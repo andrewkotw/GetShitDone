@@ -597,15 +597,18 @@
       margin-top: 22px;
     }
 
-    .task-row {
+.task-row {
+      /* CHANGE THIS: Add an 'auto' column at the start for the drag handle */
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: auto 1fr auto;
       gap: 10px;
       align-items: center;
       background: rgba(255,255,255,.68);
       border: 1px solid rgba(0,0,0,.08);
       border-radius: 18px;
       padding: 10px 10px 10px 16px;
+      /* Add transition for smooth drag feedback */
+      transition: border-color 0.2s, background 0.2s;
     }
 
     .task-row input {
@@ -1180,6 +1183,9 @@
               <div class="label">Targets</div>
               <div id="mini-task-list" class="task-mini-list"></div>
             </div>
+            <button class="btn secondary" onclick="openMiniTimer()" title="Pop out a mini timer">
+  MINI PLAYER
+</button>
 
             <button class="give-up-link" onclick="failMission()">I'm weak and give up ›</button>
           </aside>
@@ -1304,6 +1310,86 @@
   return state.audioContext;
 }
 
+// Keep track of our mini window elements
+let pipTimerEl = null;
+let pipTaskEl = null;
+
+async function openMiniTimer() {
+  if (!('documentPictureInPicture' in window)) {
+    alert("Your browser doesn't support the Mini Player API yet. Try Chrome or Edge!");
+    return;
+  }
+
+  try {
+    const pipWindow = await window.documentPictureInPicture.requestWindow({
+      width: 320,
+      height: 160,
+    });
+
+    // 1. Inject proper CSS to kill the white border and style the background
+    pipWindow.document.head.innerHTML = `
+      <style>
+        body {
+          margin: 0;
+          padding: 0;
+          height: 100vh;
+          /* Subtle dark gradient matching your app */
+          background: linear-gradient(145deg, #161621 0%, #050509 100%);
+          color: white;
+          font-family: Inter, Arial, Helvetica, sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+        #pip-timer {
+          font-size: clamp(3.5rem, 15vw, 5rem);
+          font-weight: 300; /* Much lighter, sleeker font weight */
+          line-height: 1;
+          letter-spacing: -0.04em;
+          font-variant-numeric: tabular-nums;
+          text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #pip-task {
+          font-size: 1.15rem;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.75); /* Clearer, light gray text */
+          margin-top: 10px;
+          text-align: center;
+          padding: 0 20px;
+          /* Allow up to 2 lines for longer tasks before truncating */
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      </style>
+    `;
+
+    // 2. Add the clean HTML structure
+    pipWindow.document.body.innerHTML = `
+      <div id="pip-timer">00:00</div>
+      <div id="pip-task">Loading...</div>
+    `;
+
+    pipTimerEl = pipWindow.document.getElementById('pip-timer');
+    pipTaskEl = pipWindow.document.getElementById('pip-task');
+
+    pipWindow.addEventListener("pagehide", () => {
+      pipTimerEl = null;
+      pipTaskEl = null;
+    });
+
+    updateDisplay();
+
+  } catch (error) {
+    console.error("Failed to open Mini Player:", error);
+  }
+}
+
+
+
 function beep(freq, start, duration, type = 'sine', gain = 0.045) {
   const ctx = ensureAudio();
   if (!ctx) return;
@@ -1371,6 +1457,16 @@ function playSound(kind) {
   }
 }
 
+function sendNotification(title, body) {
+  // Check if browser supports notifications and if permission is granted
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, {
+      body: body,
+      icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>' // Cool lightning bolt emoji icon
+    });
+  }
+}
+
 function toggleSound() {
   state.soundEnabled = !state.soundEnabled;
 
@@ -1403,14 +1499,56 @@ function toggleSound() {
       showPage('tasks-page');
     }
 
+let draggedRow = null; // Variable to keep track of the row being dragged
+
     function addTask(value = '', placeholder = 'Write one clear target', afterRow = null) {
       const list = $('task-list');
       const row = document.createElement('div');
       row.className = 'task-row';
+      row.draggable = true; // Makes the element draggable
+
+      // Added a drag handle (⋮⋮) to the HTML
       row.innerHTML = `
+        <div style="cursor: grab; color: #a1a1aa; font-weight: bold; padding-right: 5px; user-select: none;">⋮</div>
         <input value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" onkeydown="handleTaskKeydown(event, this)" />
         <button class="icon-btn" onclick="this.parentElement.remove()" title="Remove target">×</button>
       `;
+
+      // --- DRAG AND DROP LOGIC ---
+      row.addEventListener('dragstart', function(e) {
+        draggedRow = row;
+        e.dataTransfer.effectAllowed = 'move';
+        row.style.opacity = '0.5'; // Make it semi-transparent while dragging
+      });
+
+      row.addEventListener('dragend', function() {
+        draggedRow = null;
+        row.style.opacity = '1';
+        document.querySelectorAll('.task-row').forEach(el => el.style.borderTop = '');
+      });
+
+      row.addEventListener('dragover', function(e) {
+        e.preventDefault(); // Necessary to allow dropping
+        e.dataTransfer.dropEffect = 'move';
+        // Visual cue: show a line where it will drop
+        if (draggedRow !== this) {
+          this.style.borderTop = '2px solid var(--accent)';
+        }
+      });
+
+      row.addEventListener('dragleave', function() {
+        this.style.borderTop = ''; // Remove visual cue when mouse leaves
+      });
+
+      row.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderTop = '';
+        if (draggedRow !== this) {
+          // Move the dragged row before the row it was dropped onto
+          list.insertBefore(draggedRow, this);
+        }
+      });
+      // --- END DRAG AND DROP LOGIC ---
 
       if (afterRow && afterRow.parentElement === list) {
         afterRow.insertAdjacentElement('afterend', row);
@@ -1454,6 +1592,10 @@ function toggleSound() {
     }
 
     function startMission() {
+
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+      }
       const hours = Math.max(0, parseInt($('mission-hours').value || '0', 10));
       const minutes = Math.max(0, parseInt($('mission-minutes').value || '0', 10));
       state.remainingSeconds = Math.max(60, hours * 3600 + minutes * 60);
@@ -1491,6 +1633,7 @@ function toggleSound() {
   state.breakBankSeconds += state.intervalBonusAmount;
   state.focusedWorkSinceBonus = 0;
   playSound('break');
+  sendNotification("Bonus Time Earned!", "You've worked 30 mins. +5 minutes added to your break bank.");
 }
 
           if (state.remainingSeconds <= 0) {
@@ -1499,6 +1642,8 @@ function toggleSound() {
   state.mode = 'paused';
   $('extend-modal').classList.add('show');
   playSound('warning');
+  sendNotification("Timer Paused", "Time is up! Add emergency time or accept your consequence.");
+
   return;
 }
         }
@@ -1671,6 +1816,13 @@ if (currentTaskText.length > 90) {
 }
 
 updateMiniTaskList();
+
+const timeStr = formatTime(state.remainingSeconds);
+      document.title = state.mode === 'work' ? `(${timeStr}) ${currentTaskText}` : 'Get Shit Done';
+
+      if (pipTimerEl) pipTimerEl.textContent = timeStr;
+      if (pipTaskEl) pipTaskEl.textContent = currentTaskText;
+
     }
 
     function updateMiniTaskList() {
