@@ -36,7 +36,18 @@ Pick a mission. Start the countdown. Get it done.
 8. Finish the mission to claim the reward — or face the consequence.
 
 On supported devices, you can also install it as a PWA and use it like a small standalone app.
+---
+## Keyboard Shortcuts
 
+During an active mission, the app supports a few basic keyboard shortcuts:
+
+- **Space** – pause or resume the current mission
+- **Enter** – mark the current target as done
+- **S** – skip the current target for now
+- **B** – take a break
+- **Esc** – close supported pop-up dialogs
+
+Shortcuts are ignored while typing in input fields, so they should not interfere when setting up a mission, writing tasks, or editing rewards and consequences.
 ---
 
 ## Tech Stack
