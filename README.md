@@ -43,14 +43,13 @@ On supported devices, you can also install it as a PWA and use it like a small s
 
 This project is intentionally simple:
 
-- HTML
-- CSS
-- JavaScript
-- PWA manifest
-- Service worker
-- GitHub Pages
+- **HTML** for the app structure
+- **CSS** for the interface and responsive layout
+- **JavaScript** for the timer, tasks, break bank, notifications, and app behavior
+- **PWA support** with `manifest.json` and `sw.js`
+- **GitHub Pages** for hosting
 
-No framework, no backend, no build tools.
+No framework, no backend, no database, and no build tools.
 
 ---
 
@@ -61,21 +60,17 @@ I wanted a small tool that helps me focus on the current task instead of managin
 The app is designed to feel like a personal mission board: add tasks, start the timer, take breaks, and keep going.
 
 It is also a learning project, so the code may not be perfect, but it already does what I need.
+
 ---
-## Future Direction
 
-The app is already usable, so future work will focus on making it more reliable, easier to maintain, and better on mobile.
+## Planned Improvements
 
-Planned or possible improvements:
+- Clean up and refactor the current codebase.
+- Improve PWA install and update behavior.
+- Make the timer more reliable across longer sessions.
+- Polish the mobile and Mini Player experience.
+- Explore an Android version later if needed.
 
-- Improve mobile/PWA behavior, especially notifications and sound
-- Explore a Capacitor Android version for stronger background alarms and lock-screen countdown support
-- Clean up the codebase and separate HTML, CSS, and JavaScript more clearly
-- Add simple mission history and completed-session summaries
-- Add data export or backup
-- Polish the Mini Player experience
-- Improve accessibility, keyboard navigation, and mobile layout
-- Keep the app lightweight instead of turning it into a full productivity platform
 ---
 
 ## Project Structure
@@ -84,7 +79,7 @@ Planned or possible improvements:
 get-shit-done/
 ├── index.html
 ├── manifest.json
-├── service-worker.js
+├── sw.js
 ├── icons/
 └── README.md
 
