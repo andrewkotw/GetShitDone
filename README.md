@@ -5,7 +5,7 @@ That app has since been discontinued and unlisted, but it left a strong impressi
 
 This project is my attempt to recreate that feeling as a simple web app: the same direct tone, mission-like flow, and no-nonsense approach to focusing on the next task.
 
-Pick a mission. Start the countdown. Get it done.
+Pick a mission. Start the countdown. Get Shit Done.
 
 ### 👉 **Try it here:** [Get Shit Done](https://andrewkotw.github.io/GetShitDone/)
 ---
@@ -36,6 +36,7 @@ Pick a mission. Start the countdown. Get it done.
 8. Finish the mission to claim the reward — or face the consequence.
 
 On supported devices, you can also install it as a PWA and use it like a small standalone app.
+
 ---
 ## Keyboard Shortcuts
 
@@ -48,6 +49,7 @@ During an active mission, the app supports a few basic keyboard shortcuts:
 - **Esc** – close supported pop-up dialogs
 
 Shortcuts are ignored while typing in input fields, so they should not interfere when setting up a mission, writing tasks, or editing rewards and consequences.
+
 ---
 
 ## Tech Stack
