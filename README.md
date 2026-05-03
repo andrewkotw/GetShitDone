@@ -7,7 +7,7 @@ This project is my attempt to recreate that feeling as a simple web app: the sam
 
 Pick a mission. Start the countdown. Get it done.
 
-👉 **Try it here:** [Get Shit Done](https://andrewkotw.github.io/GetShitDone/)
+### 👉 **Try it here:** [Get Shit Done](https://andrewkotw.github.io/GetShitDone/)
 ---
 
 ## Features
