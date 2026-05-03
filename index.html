@@ -3,7 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mission Focus Timer Prototype</title>
+    <title>Get Shit Done</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <meta name="theme-color" content="#050509" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Get Shit Done" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <style>
       :root {
         --bg: #050509;
@@ -1842,6 +1850,7 @@
         mode: "setup",
         timerId: null,
         taskStartedAt: null,
+        lastTickAt: null,
         focusedWorkSinceBonus: 0,
         earningPeriodSeconds: 0,
         breakEarnRatio: 6,
@@ -2218,6 +2227,7 @@
         state.earningPeriodSeconds = 0;
         state.mode = "work";
         state.taskStartedAt = Date.now();
+        state.lastTickAt = Date.now();
         state.tasks[0].status = "active";
 
         $("active-mission-title").textContent = state.missionTitle;
@@ -2247,6 +2257,9 @@
       }
 
       function completeTask() {
+        if (state.mode !== "work") return;
+
+        applyElapsedTimerTime();
         if (state.mode !== "work") return;
 
         const task = state.tasks[state.activeTaskIndex];
@@ -2284,6 +2297,9 @@
 
       function skipTask() {
         if (state.mode !== "work") return;
+
+        applyElapsedTimerTime();
+        if (state.mode !== "work") return;
         if (state.tasks.length <= 1) return;
 
         const currentTask = state.tasks[state.activeTaskIndex];
@@ -2313,7 +2329,9 @@
       function pauseMission() {
         if (state.mode !== "work") return;
 
+        applyElapsedTimerTime();
         state.mode = "paused-work";
+        state.lastTickAt = Date.now();
         updateDisplay();
       }
 
@@ -2321,6 +2339,7 @@
         if (state.mode !== "paused-work") return;
 
         state.mode = "work";
+        state.lastTickAt = Date.now();
         updateDisplay();
       }
 
@@ -2344,8 +2363,12 @@
           return;
         }
 
+        applyElapsedTimerTime();
+        if (state.mode !== "work") return;
+
         state.mode = "break";
         state.breakRemainingSeconds = state.breakBankSeconds;
+        state.lastTickAt = Date.now();
 
         updateDisplay();
         showPage("break-page");
@@ -2356,6 +2379,7 @@
         if (state.mode !== "break" && state.mode !== "paused") return;
 
         state.mode = "work";
+        state.lastTickAt = Date.now();
 
         updateDisplay();
         showPage("active-page");
@@ -2368,6 +2392,7 @@
         state.remainingSeconds += add * 60;
         $("extend-modal").classList.remove("show");
         state.mode = "work";
+        state.lastTickAt = Date.now();
 
         updateDisplay();
         playSound("extend");
@@ -2428,6 +2453,7 @@
         state.mode = "setup";
         state.timerId = null;
         state.taskStartedAt = null;
+        state.lastTickAt = null;
         state.focusedWorkSinceBonus = 0;
         state.earningPeriodSeconds = 0;
         state.missionDurationSeconds = 0;
@@ -2480,54 +2506,90 @@
 
       function startTicking() {
         clearInterval(state.timerId);
+        state.lastTickAt = Date.now();
 
         state.timerId = setInterval(() => {
-          if (state.mode === "work") {
-            tickWorkTimer();
-          }
-
-          if (state.mode === "break") {
-            tickBreakTimer();
-          }
-
+          applyElapsedTimerTime();
           updateDisplay();
         }, 1000);
       }
 
-      function tickWorkTimer() {
-        state.remainingSeconds--;
-        state.focusedWorkSinceBonus++;
-        state.earningPeriodSeconds++;
-
-        if (state.focusedWorkSinceBonus >= state.intervalBonusEvery) {
-          earnIntervalBonus();
+      function applyElapsedTimerTime() {
+        if (state.mode !== "work" && state.mode !== "break") {
+          state.lastTickAt = Date.now();
+          return;
         }
+
+        const now = Date.now();
+
+        if (!state.lastTickAt) {
+          state.lastTickAt = now;
+          return;
+        }
+
+        const elapsedSeconds = Math.floor((now - state.lastTickAt) / 1000);
+        if (elapsedSeconds <= 0) return;
+
+        state.lastTickAt += elapsedSeconds * 1000;
+
+        if (state.mode === "work") {
+          applyWorkElapsedSeconds(elapsedSeconds);
+          return;
+        }
+
+        if (state.mode === "break") {
+          applyBreakElapsedSeconds(elapsedSeconds);
+        }
+      }
+
+      function applyWorkElapsedSeconds(elapsedSeconds) {
+        const workSeconds = Math.min(elapsedSeconds, state.remainingSeconds);
+
+        state.remainingSeconds = Math.max(0, state.remainingSeconds - elapsedSeconds);
+        state.focusedWorkSinceBonus += workSeconds;
+        state.earningPeriodSeconds += workSeconds;
+
+        earnIntervalBonusesIfNeeded();
 
         if (state.remainingSeconds <= 0) {
           pauseForEmergencyTime();
         }
       }
 
-      function tickBreakTimer() {
-        state.breakRemainingSeconds--;
-        state.breakBankSeconds = Math.max(0, state.breakBankSeconds - 1);
+      function applyBreakElapsedSeconds(elapsedSeconds) {
+        const breakSeconds = Math.min(elapsedSeconds, state.breakRemainingSeconds, state.breakBankSeconds);
+
+        state.breakRemainingSeconds = Math.max(0, state.breakRemainingSeconds - breakSeconds);
+        state.breakBankSeconds = Math.max(0, state.breakBankSeconds - breakSeconds);
 
         if (state.breakRemainingSeconds <= 0 || state.breakBankSeconds <= 0) {
           returnToWork();
         }
       }
 
-      function earnIntervalBonus() {
-        state.breakBankSeconds += state.intervalBonusAmount;
-        state.focusedWorkSinceBonus = 0;
+      function earnIntervalBonusesIfNeeded() {
+        if (state.intervalBonusEvery <= 0) return;
 
+        let bonusesEarned = 0;
+
+        while (state.focusedWorkSinceBonus >= state.intervalBonusEvery) {
+          state.focusedWorkSinceBonus -= state.intervalBonusEvery;
+          bonusesEarned++;
+        }
+
+        if (bonusesEarned <= 0) return;
+
+        state.breakBankSeconds += state.intervalBonusAmount * bonusesEarned;
         playSound("break");
-        sendNotification("Bonus Time Earned!", "You've worked 30 mins. +5 minutes added to your break bank.");
+
+        const bonusMinutes = Math.round((state.intervalBonusAmount * bonusesEarned) / 60);
+        sendNotification("Bonus Time Earned!", `+${bonusMinutes} minutes added to your break bank.`);
       }
 
       function pauseForEmergencyTime() {
         state.remainingSeconds = 0;
         state.mode = "paused";
+        state.lastTickAt = Date.now();
 
         updateDisplay();
         $("extend-modal").classList.add("show");
@@ -2982,18 +3044,35 @@
       }
 
       // =========================================================
+      // PWA Service Worker
+      // =========================================================
+
+      function registerServiceWorker() {
+        if (!("serviceWorker" in navigator)) return;
+
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch((error) => {
+            console.warn("Service worker registration failed:", error);
+          });
+        });
+      }
+
+      // =========================================================
       // Initialization
       // =========================================================
 
       let pipPageWasHidden = false;
 
       document.addEventListener("visibilitychange", () => {
-        if (!pipWindowRef || pipWindowRef.closed) return;
-
         if (document.hidden) {
-          pipPageWasHidden = true;
+          if (pipWindowRef && !pipWindowRef.closed) {
+            pipPageWasHidden = true;
+          }
           return;
         }
+
+        applyElapsedTimerTime();
+        updateDisplay();
 
         if (pipPageWasHidden) {
           closeMiniTimer();
@@ -3001,10 +3080,16 @@
         }
       });
 
+      window.addEventListener("focus", () => {
+        applyElapsedTimerTime();
+        updateDisplay();
+      });
+
       loadSettings();
       applySettingsToUI();
       setupSettingsAutoSave();
       setupKeyboardShortcuts();
+      registerServiceWorker();
 
       updateClock();
       setInterval(updateClock, 1000);
