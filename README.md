@@ -6,6 +6,7 @@ I built this because I wanted a focus timer that feels more direct and motivatin
 
 Pick a mission. Start the countdown. Get it done.
 
+👉 **Try it here:** [Get Shit Done](https://andrewkotw.github.io/GetShitDone/)
 ---
 
 ## Features
