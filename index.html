@@ -51,9 +51,9 @@
         font: inherit;
       }
       .app-shell {
-        min-height: 100vh;
+        min-height: 100dvh;
         display: grid;
-        grid-template-rows: auto 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
       }
       .topbar {
         position: sticky;
@@ -127,16 +127,82 @@
         font-weight: 750;
       }
       .dot {
+        position: relative;
         width: 8px;
         height: 8px;
+        flex: 0 0 auto;
+
         border-radius: 50%;
         background: var(--accent);
-        box-shadow: 0 0 22px rgba(217, 176, 106, 0.55);
+
+        box-shadow:
+          0 0 10px rgba(217, 176, 106, 0.75),
+          0 0 22px rgba(217, 176, 106, 0.45);
+
+        animation: clockPulseDot 1s ease-out infinite;
+      }
+
+      .dot::after {
+        content: "";
+        position: absolute;
+        inset: -9px;
+
+        border-radius: 50%;
+        border: 1px solid rgba(217, 176, 106, 0.45);
+
+        opacity: 0;
+        transform: scale(0.45);
+
+        animation: clockPulseAura 1s ease-out infinite;
+      }
+
+      @keyframes clockPulseDot {
+        0% {
+          transform: scale(1);
+          box-shadow:
+            0 0 8px rgba(217, 176, 106, 0.65),
+            0 0 18px rgba(217, 176, 106, 0.35);
+        }
+
+        18% {
+          transform: scale(1.35);
+          box-shadow:
+            0 0 14px rgba(217, 176, 106, 0.95),
+            0 0 34px rgba(217, 176, 106, 0.65);
+        }
+
+        100% {
+          transform: scale(1);
+          box-shadow:
+            0 0 8px rgba(217, 176, 106, 0.65),
+            0 0 18px rgba(217, 176, 106, 0.35);
+        }
+      }
+
+      @keyframes clockPulseAura {
+        0% {
+          opacity: 0.65;
+          transform: scale(0.35);
+        }
+
+        80% {
+          opacity: 0;
+          transform: scale(1.6);
+        }
+
+        100% {
+          opacity: 0;
+          transform: scale(1.6);
+        }
       }
       .stage {
         width: min(var(--max), calc(100vw - 36px));
+        height: 100%;
         margin: 0 auto;
         padding: 22px 0 34px;
+
+        display: grid;
+        align-items: center;
       }
       .page {
         display: none;
@@ -785,6 +851,118 @@
         background: rgba(255, 255, 255, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.12);
       }
+      .rules-card {
+        overflow: hidden;
+      }
+
+      .rules-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "label toggle"
+          "summary summary";
+        gap: 10px 14px;
+        align-items: center;
+      }
+
+      .rules-header > div {
+        display: contents;
+      }
+
+      .rules-header .label {
+        grid-area: label;
+        margin: 0;
+      }
+
+      .rules-summary {
+        grid-area: summary;
+        margin: 0;
+        line-height: 1.45;
+      }
+
+      .rules-toggle {
+        grid-area: toggle;
+        align-self: start;
+        justify-self: end;
+        flex-shrink: 0;
+
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.07);
+        color: rgba(255, 255, 255, 0.82);
+        border-radius: 999px;
+        padding: 8px 12px;
+
+        font-size: 12px;
+        font-weight: 950;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        cursor: pointer;
+
+        transition:
+          background 0.14s ease,
+          color 0.14s ease,
+          border-color 0.14s ease,
+          transform 0.14s ease;
+      }
+
+      .rules-toggle:hover {
+        color: white;
+        background: rgba(217, 176, 106, 0.14);
+        border-color: rgba(217, 176, 106, 0.45);
+        transform: translateY(-1px);
+      }
+
+      .rules-panel {
+        display: none;
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .rules-panel.show {
+        display: grid;
+        gap: 18px;
+      }
+
+      .rule-control {
+        display: grid;
+        gap: 10px;
+      }
+
+      .rule-control-top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+
+        color: rgba(255, 255, 255, 0.62);
+        font-size: 12px;
+        font-weight: 950;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .rule-control-top strong {
+        color: white;
+        font-size: 16px;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .rule-slider {
+        width: 100%;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+
+      .rule-help {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
       .break-bank {
         font-size: clamp(44px, 5vw, 68px);
         font-weight: 420;
@@ -843,6 +1021,70 @@
         box-shadow:
           0 28px 90px rgba(0, 0, 0, 0.42),
           inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      }
+      .result-content {
+        width: min(760px, 100%);
+      }
+
+      .session-summary {
+        width: min(720px, 100%);
+        margin: 0 auto 28px;
+        padding: 16px 22px;
+
+        color: rgba(255, 255, 255, 0.82);
+        text-align: left;
+
+        background: radial-gradient(circle at 12% 0%, rgba(217, 176, 106, 0.12), transparent 34%), rgba(255, 255, 255, 0.07);
+
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+
+        box-shadow:
+          0 14px 36px rgba(0, 0, 0, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.07);
+      }
+
+      .session-summary-title {
+        margin: 0 0 14px;
+
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 950;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        text-align: Left;
+      }
+
+      .session-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 10px;
+      }
+
+      .summary-item {
+        min-width: 0;
+      }
+
+      .summary-label {
+        margin-bottom: 5px;
+
+        color: rgba(255, 255, 255, 0.46);
+        font-size: 12px;
+        font-weight: 950;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .summary-value {
+        color: white;
+        font-size: clamp(16px, 2.2vw, 24px);
+        font-weight: 850;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .summary-note {
+        display: none;
       }
       .center-stack {
         min-height: 650px;
@@ -968,7 +1210,10 @@
           display: none;
         }
         .stage {
+          height: auto;
+          min-height: calc(100dvh - 62px);
           padding-top: 18px;
+          align-items: start;
         }
         .mission-card,
         .timer-card,
@@ -1030,6 +1275,56 @@
         }
         .modal-actions.compact-actions {
           grid-template-columns: 1fr;
+        }
+        .session-summary {
+          width: 100%;
+          margin-bottom: 22px;
+          padding: 16px 18px;
+
+          border-radius: 22px;
+          justify-content: flex-start;
+          text-align: left;
+        }
+
+        .session-summary-title {
+          width: 100%;
+          margin-bottom: 2px;
+        }
+
+        .session-summary-grid {
+          width: 100%;
+          justify-content: flex-start;
+          gap: 8px 0;
+        }
+
+        .summary-item {
+          width: 50%;
+          padding: 0;
+          border-right: 0;
+          display: block;
+        }
+
+        .summary-label {
+          margin-bottom: 4px;
+          font-size: 10px;
+        }
+
+        .summary-value {
+          font-size: 18px;
+        }
+
+        .rules-header {
+          grid-template-columns: minmax(0, 1fr) auto;
+          grid-template-areas:
+            "label toggle"
+            "summary summary";
+          gap: 10px 12px;
+        }
+
+        .rules-toggle {
+          width: auto;
+          justify-content: center;
+          padding: 8px 12px;
         }
       }
       .sound-toggle {
@@ -1163,9 +1458,39 @@
                 <h1 class="side-big">Get Shit Done</h1>
                 <p class="side-text">One mission. One timer. Earn your break, bank it, and spend it when you actually need it.</p>
               </div>
-              <div class="stat-card">
-                <div class="label">Default rules</div>
-                <p class="side-text" style="margin: 0">1 minute break per 6 minutes of work. +5 minutes every 30 focused minutes.</p>
+              <div class="stat-card rules-card">
+                <div class="rules-header">
+                  <div>
+                    <div class="label">Break rules</div>
+                    <p id="rules-summary" class="side-text rules-summary">1 minute break per 6 minutes of work. +5 minutes every 30 focused minutes.</p>
+                  </div>
+
+                  <button id="rules-toggle" class="rules-toggle" type="button" onclick="toggleRulesPanel()" aria-expanded="false" aria-controls="rules-panel">Customize ▾</button>
+                </div>
+
+                <div id="rules-panel" class="rules-panel">
+                  <div class="rule-control">
+                    <div class="rule-control-top">
+                      <span>Break ratio</span>
+                      <strong>1 : <span id="break-ratio-value">6</span></strong>
+                    </div>
+
+                    <input id="break-ratio-slider" class="rule-slider" type="range" min="2" max="8" step="1" value="6" oninput="updateBreakRulesFromInputs()" />
+
+                    <p class="rule-help">Earn 1 minute of break for every <span id="break-ratio-copy">6</span> minutes of work.</p>
+                  </div>
+
+                  <div class="rule-control">
+                    <div class="rule-control-top">
+                      <span>Bonus interval</span>
+                      <strong>+5 / <span id="bonus-interval-value">30</span> min</strong>
+                    </div>
+
+                    <input id="bonus-interval-slider" class="rule-slider" type="range" min="15" max="60" step="5" value="30" oninput="updateBreakRulesFromInputs()" />
+
+                    <p class="rule-help">Add a 5-minute bonus every <span id="bonus-interval-copy">30</span> focused minutes.</p>
+                  </div>
+                </div>
               </div>
             </aside>
           </div>
@@ -1193,8 +1518,7 @@
               <div>
                 <div class="side-eyebrow">Self-contract</div>
                 <h2 class="side-big">Make the stakes visible.</h2>
-                <p class="side-text">The consequence is not for shame. It gives the mission weight. The reward gives the finish line a shape.
-                </p>
+                <p class="side-text">The consequence is not for shame. It gives the mission weight. The reward gives the finish line a shape.</p>
               </div>
               <button class="btn btn-dark arrow-left" onclick="showPage('setup-page')">Back to mission setup</button>
             </aside>
@@ -1281,12 +1605,16 @@
         </div>
         <div id="result-page" class="page">
           <section class="result-page-card center-stack">
-            <div>
+            <div class="result-content">
               <h1 class="result-title" id="result-title">Mission complete</h1>
+
               <div class="result-card">
                 <div class="kicker" id="result-label">Your reward</div>
                 <p class="result-text" id="result-text">make yourself the hero</p>
               </div>
+
+              <div class="session-summary" id="session-summary"></div>
+
               <button class="btn btn-primary btn-giant arrow" onclick="resetApp()">Another mission</button>
             </div>
           </section>
@@ -1366,6 +1694,10 @@
         intervalBonusAmount: 5 * 60,
         soundEnabled: true,
         audioContext: null,
+
+        missionDurationSeconds: 0,
+        missionStartedAt: null,
+        missionEndedAt: null,
       };
 
       const $ = (id) => document.getElementById(id);
@@ -1373,6 +1705,8 @@
       let draggedRow = null;
       let pipTimerEl = null;
       let pipTaskEl = null;
+      let pipWindowRef = null;
+      let pipOpenedAt = 0;
 
       // =========================================================
       // Audio and Notifications
@@ -1634,6 +1968,9 @@
         const minutes = Math.max(0, parseInt($("mission-minutes").value || "0", 10));
 
         state.remainingSeconds = Math.max(60, hours * 3600 + minutes * 60);
+        state.missionDurationSeconds = state.remainingSeconds;
+        state.missionStartedAt = Date.now();
+        state.missionEndedAt = null;
         state.tasks = collectTasksFromEditor();
 
         if (state.tasks.length === 0) {
@@ -1784,11 +2121,15 @@
 
       function succeedMission() {
         clearInterval(state.timerId);
+
         state.mode = "success";
+        state.missionEndedAt = Date.now();
 
         $("result-title").textContent = "Mission complete";
         $("result-label").textContent = "Your reward";
         $("result-text").textContent = state.reward;
+
+        renderSessionSummary();
 
         showPage("result-page");
         playSound("success");
@@ -1796,12 +2137,17 @@
 
       function failMission() {
         clearInterval(state.timerId);
+
         $("extend-modal").classList.remove("show");
+
         state.mode = "failed";
+        state.missionEndedAt = Date.now();
 
         $("result-title").textContent = "Mission failed";
         $("result-label").textContent = "Your consequence";
         $("result-text").textContent = state.consequence;
+
+        renderSessionSummary();
 
         showPage("result-page");
         playSound("fail");
@@ -1829,6 +2175,9 @@
         state.timerId = null;
         state.taskStartedAt = null;
         state.focusedWorkSinceBonus = 0;
+        state.missionDurationSeconds = 0;
+        state.missionStartedAt = null;
+        state.missionEndedAt = null;
 
         $("hero-name").value = "human";
         $("mission-title").value = "Finish report";
@@ -1839,6 +2188,10 @@
         $("task-list").innerHTML = "";
         $("extend-minutes").value = 10;
         $("mercy-break-minutes").value = 3;
+
+        if ($("session-summary")) {
+          $("session-summary").innerHTML = "";
+        }
 
         updateDisplay();
       }
@@ -1920,6 +2273,44 @@
       }
 
       // =========================================================
+      // Break Rule Settings
+      // =========================================================
+
+      function toggleRulesPanel() {
+        const panel = $("rules-panel");
+        const toggle = $("rules-toggle");
+
+        const isOpen = panel.classList.toggle("show");
+
+        toggle.setAttribute("aria-expanded", String(isOpen));
+        toggle.textContent = isOpen ? "Hide ▴" : "Customize ▾";
+      }
+
+      function updateBreakRulesFromInputs() {
+        const ratio = parseInt($("break-ratio-slider").value || "6", 10);
+        const bonusIntervalMinutes = parseInt($("bonus-interval-slider").value || "30", 10);
+
+        state.breakEarnRatio = ratio;
+        state.intervalBonusEvery = bonusIntervalMinutes * 60;
+        state.intervalBonusAmount = 5 * 60;
+
+        updateBreakRulesUI();
+      }
+
+      function updateBreakRulesUI() {
+        const ratio = state.breakEarnRatio;
+        const bonusIntervalMinutes = Math.round(state.intervalBonusEvery / 60);
+
+        $("break-ratio-value").textContent = ratio;
+        $("break-ratio-copy").textContent = ratio;
+
+        $("bonus-interval-value").textContent = bonusIntervalMinutes;
+        $("bonus-interval-copy").textContent = bonusIntervalMinutes;
+
+        $("rules-summary").textContent = `1 minute break per ${ratio} minutes of work. +5 minutes every ${bonusIntervalMinutes} focused minutes.`;
+      }
+
+      // =========================================================
       // Mini Player / Picture-in-Picture
       // =========================================================
 
@@ -1934,17 +2325,23 @@
             width: 320,
             height: 160,
           });
+          pipWindowRef = pipWindow;
+          pipOpenedAt = Date.now();
+          pipPageWasHidden = false;
 
           pipWindow.document.head.innerHTML = getMiniPlayerStyles();
           pipWindow.document.body.innerHTML = `
-      <div id="pip-timer">00:00</div>
-      <div id="pip-task">Loading...</div>
-    `;
+  <div id="pip-timer">00:00</div>
+  <div id="pip-task" title="Return to main timer">Loading...</div>
+`;
 
           pipTimerEl = pipWindow.document.getElementById("pip-timer");
           pipTaskEl = pipWindow.document.getElementById("pip-task");
 
+          pipTaskEl.addEventListener("click", returnToMainTimerFromMini);
+
           pipWindow.addEventListener("pagehide", () => {
+            pipWindowRef = null;
             pipTimerEl = null;
             pipTaskEl = null;
           });
@@ -1953,6 +2350,29 @@
         } catch (error) {
           console.error("Failed to open Mini Player:", error);
         }
+      }
+
+      function returnToMainTimerFromMini() {
+        showPage("active-page");
+
+        // Ask the browser to focus the main Get Shit Done page.
+        window.focus();
+
+        // Close the mini player after returning.
+        closeMiniTimer();
+      }
+
+      function closeMiniTimer() {
+        if (!pipWindowRef || pipWindowRef.closed) return;
+
+        const justOpened = Date.now() - pipOpenedAt < 800;
+        if (justOpened) return;
+
+        pipWindowRef.close();
+
+        pipWindowRef = null;
+        pipTimerEl = null;
+        pipTaskEl = null;
       }
 
       function getMiniPlayerStyles() {
@@ -1981,18 +2401,36 @@
         text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       }
 
-      #pip-task {
-        font-size: 1.15rem;
-        font-weight: 500;
-        color: rgba(255, 255, 255, 0.75);
-        margin-top: 10px;
-        text-align: center;
-        padding: 0 20px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
+#pip-task {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 10px;
+  text-align: center;
+  padding: 6px 20px;
+  border-radius: 14px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  cursor: pointer;
+  transition:
+    color 0.14s ease,
+    background 0.14s ease,
+    transform 0.14s ease;
+}
+
+#pip-task:hover {
+  color: #fff0c9;
+  background: rgba(217, 176, 106, 0.12);
+  transform: translateY(-1px);
+}
+
+#pip-task:active {
+  transform: translateY(1px) scale(0.98);
+}
     </style>
   `;
       }
@@ -2078,6 +2516,71 @@
         $("clock").textContent = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       }
 
+      function renderSessionSummary() {
+        const summaryEl = $("session-summary");
+        if (!summaryEl) return;
+
+        const clearedTargets = state.tasks.filter((task) => task.status === "done").length;
+        const totalTargets = state.tasks.length;
+
+        const plannedDuration = state.missionDurationSeconds || 0;
+
+        const startedAt = state.missionStartedAt || Date.now();
+        const endedAt = state.missionEndedAt || Date.now();
+
+        const actualElapsedSeconds = Math.max(0, Math.round((endedAt - startedAt) / 1000));
+
+        const baseBreakEarned = Math.floor(plannedDuration / state.breakEarnRatio);
+        const actualBaseBreakEarned = Math.floor(actualElapsedSeconds / state.breakEarnRatio);
+
+        const isSuccess = state.mode === "success";
+
+        summaryEl.innerHTML = `
+    <div class="session-summary-title">
+      ${isSuccess ? "Mission report" : "Attempt report"}
+    </div>
+
+    <div class="session-summary-grid">
+      <div class="summary-item">
+        <div class="summary-label">
+          ${isSuccess ? "Mission length" : "Time survived"}
+        </div>
+        <div class="summary-value">
+          ${formatDurationWords(isSuccess ? plannedDuration : actualElapsedSeconds)}
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <div class="summary-label">Targets cleared</div>
+        <div class="summary-value">
+          ${clearedTargets} / ${totalTargets}
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <div class="summary-label">
+          ${isSuccess ? "Base break earned" : "Base break earned so far"}
+        </div>
+        <div class="summary-value">
+          ${formatDurationWords(isSuccess ? baseBreakEarned : actualBaseBreakEarned)}
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <div class="summary-label">Unused break bank</div>
+        <div class="summary-value">
+          ${formatDurationWords(state.breakBankSeconds)}
+        </div>
+      </div>
+    </div>
+
+    <p class="summary-note">
+      Base break follows your rule: 1 minute of break for every 6 minutes of mission time.
+      Bonus break and unused bank may make the final bank higher.
+    </p>
+  `;
+      }
+
       // =========================================================
       // Utility Functions
       // =========================================================
@@ -2096,6 +2599,27 @@
         return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
       }
 
+      function formatDurationWords(seconds) {
+        seconds = Math.max(0, Math.floor(seconds));
+
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+
+        if (hours > 0 && minutes > 0) {
+          return `${hours} hr ${minutes} min`;
+        }
+
+        if (hours > 0) {
+          return `${hours} hr`;
+        }
+
+        if (minutes > 0) {
+          return `${minutes} min`;
+        }
+
+        return `${seconds} sec`;
+      }
+
       function escapeHtml(text) {
         return String(text).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
       }
@@ -2104,7 +2628,24 @@
       // Initialization
       // =========================================================
 
+      let pipPageWasHidden = false;
+
+      document.addEventListener("visibilitychange", () => {
+        if (!pipWindowRef || pipWindowRef.closed) return;
+
+        if (document.hidden) {
+          pipPageWasHidden = true;
+          return;
+        }
+
+        if (pipPageWasHidden) {
+          closeMiniTimer();
+          pipPageWasHidden = false;
+        }
+      });
+
       updateClock();
+      updateBreakRulesUI();
       setInterval(updateClock, 15000);
     </script>
   </body>
