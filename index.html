@@ -1,1869 +1,2529 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mission Focus Timer Prototype</title>
-  <style>
-    :root {
-      --bg: #050509;
-      --ink: #101014;
-      --muted: #73737e;
-      --paper: #f7f6f2;
-      --paper2: #ffffff;
-      --dark: #11131f;
-      --dark2: #1e2130;
-      --accent: #d9b06a;
-      --accent2: #fff0c9;
-      --danger: #ff5b5b;
-      --success: #7de38d;
-      --shadow: rgba(0, 0, 0, 0.35);
-      --max: 1120px;
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body { min-height: 100%; }
-
-    body {
-      margin: 0;
-      color: var(--ink);
-      font-family: Inter, Arial, Helvetica, sans-serif;
-      background:
-        radial-gradient(circle at 12% 12%, rgba(255, 144, 55, .22), transparent 28%),
-        radial-gradient(circle at 88% 18%, rgba(217, 176, 106, .16), transparent 30%),
-        radial-gradient(circle at 70% 90%, rgba(55, 63, 128, .35), transparent 34%),
-        linear-gradient(135deg, #050509, #151522 52%, #070815);
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: .55;
-      background-image:
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-      background-size: 36px 36px;
-      mask-image: linear-gradient(to bottom, black, transparent 88%);
-    }
-
-    button, input {
-      font: inherit;
-    }
-
-    .app-shell {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(18px);
-      background: rgba(5, 5, 9, .72);
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-
-    .topbar-inner {
-      width: min(var(--max), calc(100vw - 36px));
-      margin: 0 auto;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: white;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 950;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-    }
-
-    .brand-mark {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border: 0;
-      background: var(--paper);
-      color: var(--ink);
-      font-weight: 950;
-      font-size: 20px;
-      cursor: pointer;
-      clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 88%);
-      box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.3);
-      transition: background .14s ease, color .14s ease, transform .14s ease, box-shadow .14s ease;
-    }
-
-    .brand-mark:hover {
-      background: #d9b06a;
-      color: #07070b;
-      transform: translateY(-2px) rotate(-3deg);
-      box-shadow: 0 0 0 1px rgba(255,255,255,.24), 0 16px 34px rgba(217,176,106,.24);
-    }
-
-    .brand-mark:active {
-      transform: translateY(1px) scale(.94);
-      box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 6px 16px rgba(0,0,0,.32);
-    }
-
-    .brand-mark:focus-visible {
-      outline: 3px solid rgba(217,176,106,.75);
-      outline-offset: 4px;
-    }
-
-    .top-meta {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      color: rgba(255,255,255,.74);
-      font-weight: 750;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 22px rgba(217, 176, 106, .55);
-    }
-
-    .stage {
-      width: min(var(--max), calc(100vw - 36px));
-      margin: 0 auto;
-      padding: 22px 0 34px;
-    }
-
-    .page {
-      display: none;
-      animation: enter .24s ease-out;
-    }
-
-    .page.active { display: block; }
-
-    @keyframes enter {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .hero-layout {
-      display: grid;
-      grid-template-columns: 1fr minmax(340px, 430px);
-      gap: 28px;
-      align-items: stretch;
-    }
-
-    .mission-card,
-    .side-card {
-      position: relative;
-      min-height: 560px;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 18% 12%, rgba(155, 92, 33, .55), transparent 28%),
-        radial-gradient(circle at 85% 80%, rgba(25, 74, 135, .44), transparent 34%),
-        linear-gradient(155deg, #3b2713 0%, #161621 45%, #080914 100%);
-      box-shadow: 0 28px 90px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.08);
-      border-radius: 28px;
-    }
-
-    .mission-card::after,
-    .side-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(110deg, transparent 0 42%, rgba(255,255,255,.045) 42% 52%, transparent 52%);
-    }
-
-    .side-card {
-      min-height: 560px;
-      background:
-        radial-gradient(circle at 70% 18%, rgba(217, 176, 106, .22), transparent 28%),
-        linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.1);
-      color: white;
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .slab {
-      position: relative;
-      z-index: 1;
-      padding: clamp(26px, 5vw, 58px);
-    }
-
-    .slab.white { background: var(--paper); }
-    .slab.dark { color: white; background: rgba(8, 9, 18, .62); }
-
-    .tilt-a {
-      clip-path: polygon(0 8%, 100% 0, 100% 92%, 0 100%);
-      margin: -22px 0;
-    }
-
-    .tilt-b {
-      clip-path: polygon(0 0, 100% 10%, 100% 100%, 0 88%);
-      margin: -16px 0;
-    }
-
-    .tilt-c {
-      clip-path: polygon(0 10%, 100% 0, 100% 88%, 0 100%);
-      margin: -16px 0;
-    }
-
-    .setup-stack {
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-      min-height: 560px;
-    }
-
-    .landing-card {
-      min-height: 520px;
-    }
-
-    .landing-card.setup-stack {
-      min-height: 520px;
-    }
-
-    .landing-side {
-      min-height: 520px;
-    }
-
-    .kicker,
-    .label {
-      color: var(--muted);
-      text-transform: uppercase;
-      font-size: clamp(14px, 1.5vw, 19px);
-      letter-spacing: .08em;
-      font-weight: 900;
-      margin-bottom: 10px;
-    }
-
-    .dark .kicker,
-    .dark .label { color: rgba(255,255,255,.72); }
-
-    .massive-title {
-      margin: 0;
-      color: white;
-      font-size: clamp(54px, 9vw, 108px);
-      line-height: .9;
-      font-weight: 950;
-      letter-spacing: -.055em;
-      text-transform: uppercase;
-      text-shadow: 0 18px 44px rgba(0,0,0,.36);
-    }
-
-    .mission-title {
-      margin: 0;
-      font-size: clamp(26px, 3.6vw, 44px);
-      line-height: .98;
-      font-weight: 950;
-      letter-spacing: -.045em;
-      text-transform: uppercase;
-      color: var(--ink);
-    }
-
-    .soft-title {
-      margin: 0;
-      font-size: clamp(24px, 3vw, 38px);
-      font-weight: 350;
-      color: #5b5b64;
-      line-height: 1.08;
-    }
-
-    .quote {
-      margin: 0;
-      font-size: clamp(22px, 2.35vw, 34px);
-      line-height: 1.22;
-      font-weight: 320;
-      letter-spacing: -.028em;
-    }
-
-    .field {
-      width: 100%;
-      border: none;
-      border-bottom: 2px solid rgba(16,16,20,.22);
-      background: transparent;
-      color: var(--ink);
-      outline: none;
-      padding: 10px 0 12px;
-      font-size: clamp(26px, 4vw, 44px);
-      font-weight: 650;
-      letter-spacing: -.035em;
-    }
-
-    .dark .field {
-      color: white;
-      border-bottom-color: rgba(255,255,255,.28);
-    }
-
-    .one-line-select {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      color: rgba(255,255,255,.9);
-      font-size: clamp(14px, 1.5vw, 19px);
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .select-wrap {
-      position: relative;
-      min-width: 150px;
-      flex: 0 1 190px;
-    }
-
-    .select-wrap::after {
-      content: "";
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      width: 9px;
-      height: 9px;
-      border-right: 2px solid #d9b06a;
-      border-bottom: 2px solid #d9b06a;
-      transform: translateY(-65%) rotate(45deg);
-      pointer-events: none;
-    }
-
-    .select-field {
-      width: 100%;
-      appearance: none;
-      border: 0;
-      border-bottom: 2px solid rgba(255,255,255,.28);
-      background: transparent;
-      color: white;
-      outline: none;
-      padding: 8px 28px 8px 4px;
-      font-size: clamp(14px, 1.5vw, 19px);
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: border-color .14s ease, color .14s ease;
-    }
-
-    .select-field:hover {
-      border-color: rgba(217,176,106,.78);
-      color: #fff0c9;
-    }
-
-    .select-field:focus-visible {
-      outline: 3px solid rgba(217,176,106,.75);
-      outline-offset: 4px;
-      border-radius: 6px;
-    }
-
-    .select-field option {
-      background: #11131f;
-      color: white;
-      font-weight: 800;
-    }
-
-    .field::placeholder {
-      color: rgba(16,16,20,.46);
-      font-weight: 650;
-    }
-
-    .dark .field::placeholder {
-      color: rgba(255,255,255,.5);
-      font-weight: 520;
-    }
-
-    .time-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-top: 18px;
-    }
-
-    .time-box {
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      padding: 20px;
-      border-radius: 20px;
-      position: relative;
-    }
-
-    .time-input-wrap {
-      display: grid;
-      grid-template-columns: 44px 1fr 44px;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .time-box .field {
-      text-align: center;
-      font-size: clamp(34px, 5vw, 56px);
-      font-weight: 950;
-      border-bottom-color: rgba(255,255,255,.22);
-      -moz-appearance: textfield;
-    }
-
-    .time-box .field::-webkit-outer-spin-button,
-    .time-box .field::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .stepper-btn {
-      width: 44px;
-      height: 54px;
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 16px;
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.8);
-      font-size: 26px;
-      font-weight: 950;
-      cursor: pointer;
-      transition: transform .14s ease, background .14s ease, color .14s ease;
-    }
-
-    .stepper-btn:hover {
-      background: rgba(217,176,106,.18);
-      color: white;
-      transform: translateY(-1px);
-    }
-
-    .stepper-btn:active {
-      transform: translateY(1px);
-    }
-
-    .unit {
-      color: rgba(255,255,255,.68);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-weight: 900;
-      text-align: center;
-      margin-top: 10px;
-      font-size: 13px;
-    }
-
-    .cta-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .btn {
-      border: 0;
-      cursor: pointer;
-      user-select: none;
-      border-radius: 999px;
-      padding: 15px 22px;
-      font-weight: 950;
-      letter-spacing: .035em;
-      text-transform: uppercase;
-      transition: transform .14s ease, box-shadow .14s ease, filter .14s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-    .btn:active { transform: translateY(1px) scale(.99); }
-
-    .btn-primary {
-      color: var(--ink);
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.92), rgba(247,246,242,.88));
-      border: 1px solid rgba(255,255,255,.55);
-      box-shadow: 0 16px 42px rgba(0,0,0,.22), inset 0 -2px 0 rgba(0,0,0,.08);
-    }
-
-    .btn-primary:hover {
-      background:
-        linear-gradient(135deg, #fffaf0, #ead7b2);
-    }
-
-    .btn-dark {
-      color: white;
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.18);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
-    }
-
-    .btn-paper {
-      color: var(--ink);
-      background: white;
-      box-shadow: 0 14px 38px rgba(0,0,0,.16), inset 0 -2px 0 rgba(0,0,0,.08);
-    }
-
-    .btn-danger {
-      color: white;
-      background: linear-gradient(135deg, #e00202, #950000);
-      box-shadow: 0 14px 36px rgba(255,91,91,.22), inset 0 -2px 0 rgba(0,0,0,.18);
-    }
-
-    .btn-giant {
-      min-height: 74px;
-      padding: 20px 32px;
-      font-size: clamp(22px, 2.5vw, 34px);
-      border-radius: 24px;
-    }
-
-    .text-cta {
-      width: 100%;
-      border: 0;
-      background: transparent;
-      box-shadow: none;
-      border-radius: 0;
-      padding: 18px 12px;
-      font-size: clamp(30px, 4.4vw, 52px);
-      font-weight: 950;
-      letter-spacing: .035em;
-      text-align: center;
-    }
-
-    .text-cta:hover {
-      background: transparent;
-      box-shadow: none;
-      transform: translateY(-1px);
-    }
-
-    .text-cta:active {
-      transform: translateY(2px) scale(.985);
-      text-shadow: none;
-    }
-
-    .text-cta:focus-visible {
-      outline: 3px solid rgba(217,176,106,.75);
-      outline-offset: 6px;
-      border-radius: 12px;
-    }
-
-    .text-cta-dark {
-      color: var(--ink);
-    }
-
-    .text-cta-dark:hover {
-      color: #1c1b16;
-      text-shadow: 0 10px 28px rgba(217,176,106,.22);
-    }
-
-    .text-cta-light {
-      color: white;
-    }
-
-    .text-cta-light:hover {
-      color: #fff0c9;
-      text-shadow: 0 10px 28px rgba(217,176,106,.22);
-    }
-
-    .arrow::after { content: "›"; font-size: 1.25em; line-height: 0; }
-    .arrow-left::before { content: "‹"; font-size: 1.25em; line-height: 0; }
-    .arrow-left::after { content: none; }
-
-    .side-eyebrow {
-      color: var(--accent);
-      text-transform: uppercase;
-      font-weight: 950;
-      letter-spacing: .12em;
-      margin-bottom: 18px;
-    }
-
-    .side-big {
-      font-size: clamp(34px, 4vw, 56px);
-      line-height: .96;
-      font-weight: 950;
-      letter-spacing: -.05em;
-      text-transform: uppercase;
-      margin: 0;
-    }
-
-    .side-text {
-      color: rgba(255,255,255,.7);
-      font-size: 18px;
-      line-height: 1.55;
-      margin: 18px 0 0;
-    }
-
-    .task-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 22px;
-    }
-
-.task-row {
-      /* CHANGE THIS: Add an 'auto' column at the start for the drag handle */
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 10px;
-      align-items: center;
-      background: rgba(255,255,255,.68);
-      border: 1px solid rgba(0,0,0,.08);
-      border-radius: 18px;
-      padding: 10px 10px 10px 16px;
-      /* Add transition for smooth drag feedback */
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .task-row input {
-      border: 0;
-      background: transparent;
-      outline: 0;
-      color: var(--ink);
-      font-size: 20px;
-      font-weight: 750;
-      min-width: 0;
-    }
-
-    .icon-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,.08);
-      background: #11131f;
-      color: rgba(255,255,255,.82);
-      font-size: 22px;
-      font-weight: 950;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 8px 18px rgba(0,0,0,.18), inset 0 -2px 0 rgba(0,0,0,.28);
-      transition:
-        transform .12s ease,
-        box-shadow .12s ease,
-        background .12s ease,
-        color .12s ease,
-        border-color .12s ease;
-    }
-
-    .icon-btn:hover {
-      background: linear-gradient(135deg, #e00202, #950000);
-      color: white;
-      border-color: rgba(255,255,255,.25);
-      transform: translateY(-2px) rotate(3deg);
-      box-shadow: 0 12px 24px rgba(255,91,91,.26), inset 0 -2px 0 rgba(0,0,0,.24);
-    }
-
-    .icon-btn:active {
-      transform: translateY(1px) scale(.94) rotate(0deg);
-      box-shadow: 0 3px 8px rgba(0,0,0,.24), inset 0 2px 4px rgba(0,0,0,.32);
-      filter: brightness(.94);
-    }
-
-    .icon-btn:focus-visible {
-      outline: 3px solid rgba(217,176,106,.75);
-      outline-offset: 3px;
-    }
-
-    .active-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 380px;
-      gap: 28px;
-      align-items: stretch;
-    }
-
-    .timer-card {
-      min-height: 650px;
-      overflow: hidden;
-      border-radius: 28px;
-      position: relative;
-      background:
-        radial-gradient(circle at 16% 12%, rgba(155, 92, 33, .42), transparent 26%),
-        radial-gradient(circle at 86% 76%, rgba(25, 74, 135, .52), transparent 32%),
-        linear-gradient(155deg, #3b2713 0%, #161621 45%, #080914 100%);
-      box-shadow: 0 28px 90px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.08);
-    }
-
-    .timer-hero {
-      display: grid;
-      place-items: center;
-      min-height: 330px;
-      color: white;
-      padding: 30px;
-    }
-
-    .big-timer {
-      font-size: clamp(76px, 13vw, 168px);
-      line-height: .9;
-      font-weight: 250;
-      letter-spacing: -.06em;
-      text-shadow: 0 18px 55px rgba(0,0,0,.35);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .focus-grid {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 22px;
-      align-items: center;
-    }
-
-    .focus-title {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mission Focus Timer Prototype</title>
+    <style>
+      :root {
+        --bg: #050509;
+        --ink: #101014;
+        --muted: #73737e;
+        --paper: #f7f6f2;
+        --paper2: #ffffff;
+        --dark: #11131f;
+        --dark2: #1e2130;
+        --accent: #d9b06a;
+        --accent2: #fff0c9;
+        --danger: #ff5b5b;
+        --success: #7de38d;
+        --shadow: rgba(0, 0, 0, 0.35);
+        --max: 1120px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        min-height: 100%;
+      }
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: Inter, Arial, Helvetica, sans-serif;
+        background:
+          radial-gradient(
+            circle at 12% 12%,
+            rgba(255, 144, 55, 0.22),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 88% 18%,
+            rgba(217, 176, 106, 0.16),
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 70% 90%,
+            rgba(55, 63, 128, 0.35),
+            transparent 34%
+          ),
+          linear-gradient(135deg, #050509, #151522 52%, #070815);
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.55;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 36px 36px;
+        mask-image: linear-gradient(to bottom, black, transparent 88%);
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      .app-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: blur(18px);
+        background: rgba(5, 5, 9, 0.72);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .topbar-inner {
+        width: min(var(--max), calc(100vw - 36px));
+        margin: 0 auto;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 950;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-weight: 950;
+        font-size: 20px;
+        cursor: pointer;
+        clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 88%);
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.18),
+          0 12px 28px rgba(0, 0, 0, 0.3);
+        transition:
+          background 0.14s ease,
+          color 0.14s ease,
+          transform 0.14s ease,
+          box-shadow 0.14s ease;
+      }
+      .brand-mark:hover {
+        background: #d9b06a;
+        color: #07070b;
+        transform: translateY(-2px) rotate(-3deg);
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.24),
+          0 16px 34px rgba(217, 176, 106, 0.24);
+      }
+      .brand-mark:active {
+        transform: translateY(1px) scale(0.94);
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.18),
+          0 6px 16px rgba(0, 0, 0, 0.32);
+      }
+      .brand-mark:focus-visible {
+        outline: 3px solid rgba(217, 176, 106, 0.75);
+        outline-offset: 4px;
+      }
+      .top-meta {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        color: rgba(255, 255, 255, 0.74);
+        font-weight: 750;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 22px rgba(217, 176, 106, 0.55);
+      }
+      .stage {
+        width: min(var(--max), calc(100vw - 36px));
+        margin: 0 auto;
+        padding: 22px 0 34px;
+      }
+      .page {
+        display: none;
+        animation: enter 0.24s ease-out;
+      }
+      .page.active {
+        display: block;
+      }
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .hero-layout {
+        display: grid;
+        grid-template-columns: 1fr minmax(340px, 430px);
+        gap: 28px;
+        align-items: stretch;
+      }
+      .mission-card,
+      .side-card {
+        position: relative;
+        min-height: 560px;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            circle at 18% 12%,
+            rgba(155, 92, 33, 0.55),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 85% 80%,
+            rgba(25, 74, 135, 0.44),
+            transparent 34%
+          ),
+          linear-gradient(155deg, #3b2713 0%, #161621 45%, #080914 100%);
+        box-shadow:
+          0 28px 90px rgba(0, 0, 0, 0.42),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        border-radius: 28px;
+      }
+      .mission-card::after,
+      .side-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          110deg,
+          transparent 0 42%,
+          rgba(255, 255, 255, 0.045) 42% 52%,
+          transparent 52%
+        );
+      }
+      .side-card {
+        min-height: 560px;
+        background:
+          radial-gradient(
+            circle at 70% 18%,
+            rgba(217, 176, 106, 0.22),
+            transparent 28%
+          ),
+          linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.09),
+            rgba(255, 255, 255, 0.03)
+          );
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .slab {
+        position: relative;
+        z-index: 1;
+        padding: clamp(26px, 5vw, 58px);
+      }
+      .slab.white {
+        background: var(--paper);
+      }
+      .slab.dark {
+        color: white;
+        background: rgba(8, 9, 18, 0.62);
+      }
+      .tilt-a {
+        clip-path: polygon(0 8%, 100% 0, 100% 92%, 0 100%);
+        margin: -22px 0;
+      }
+      .tilt-b {
+        clip-path: polygon(0 0, 100% 10%, 100% 100%, 0 88%);
+        margin: -16px 0;
+      }
+      .tilt-c {
+        clip-path: polygon(0 10%, 100% 0, 100% 88%, 0 100%);
+        margin: -16px 0;
+      }
+      .setup-stack {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        min-height: 560px;
+      }
+      .landing-card {
+        min-height: 520px;
+      }
+      .landing-card.setup-stack {
+        min-height: 520px;
+      }
+      .landing-side {
+        min-height: 520px;
+      }
+      .kicker,
+      .label {
+        color: var(--muted);
+        text-transform: uppercase;
+        font-size: clamp(14px, 1.5vw, 19px);
+        letter-spacing: 0.08em;
+        font-weight: 900;
+        margin-bottom: 10px;
+      }
+      .dark .kicker,
+      .dark .label {
+        color: rgba(255, 255, 255, 0.72);
+      }
+      .massive-title {
+        margin: 0;
+        color: white;
+        font-size: clamp(54px, 9vw, 108px);
+        line-height: 0.9;
+        font-weight: 950;
+        letter-spacing: -0.055em;
+        text-transform: uppercase;
+        text-shadow: 0 18px 44px rgba(0, 0, 0, 0.36);
+      }
+      .mission-title {
+        margin: 0;
+        font-size: clamp(26px, 3.6vw, 44px);
+        line-height: 0.98;
+        font-weight: 950;
+        letter-spacing: -0.045em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .soft-title {
+        margin: 0;
+        font-size: clamp(24px, 3vw, 38px);
+        font-weight: 350;
+        color: #5b5b64;
+        line-height: 1.08;
+      }
+      .quote {
+        margin: 0;
+        font-size: clamp(22px, 2.35vw, 34px);
+        line-height: 1.22;
+        font-weight: 320;
+        letter-spacing: -0.028em;
+      }
+      .field {
+        width: 100%;
+        border: none;
+        border-bottom: 2px solid rgba(16, 16, 20, 0.22);
+        background: transparent;
+        color: var(--ink);
+        outline: none;
+        padding: 10px 0 12px;
+        font-size: clamp(26px, 4vw, 44px);
+        font-weight: 650;
+        letter-spacing: -0.035em;
+      }
+      .dark .field {
+        color: white;
+        border-bottom-color: rgba(255, 255, 255, 0.28);
+      }
+      .one-line-select {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: clamp(14px, 1.5vw, 19px);
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .select-wrap {
+        position: relative;
+        min-width: 150px;
+        flex: 0 1 190px;
+      }
+      .select-wrap::after {
+        content: "";
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        width: 9px;
+        height: 9px;
+        border-right: 2px solid #d9b06a;
+        border-bottom: 2px solid #d9b06a;
+        transform: translateY(-65%) rotate(45deg);
+        pointer-events: none;
+      }
+      .select-field {
+        width: 100%;
+        appearance: none;
+        border: 0;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.28);
+        background: transparent;
+        color: white;
+        outline: none;
+        padding: 8px 28px 8px 4px;
+        font-size: clamp(14px, 1.5vw, 19px);
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+          border-color 0.14s ease,
+          color 0.14s ease;
+      }
+      .select-field:hover {
+        border-color: rgba(217, 176, 106, 0.78);
+        color: #fff0c9;
+      }
+      .select-field:focus-visible {
+        outline: 3px solid rgba(217, 176, 106, 0.75);
+        outline-offset: 4px;
+        border-radius: 6px;
+      }
+      .select-field option {
+        background: #11131f;
+        color: white;
+        font-weight: 800;
+      }
+      .field::placeholder {
+        color: rgba(16, 16, 20, 0.46);
+        font-weight: 650;
+      }
+      .dark .field::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 520;
+      }
+      .time-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+      .time-box {
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.06);
+        padding: 20px;
+        border-radius: 20px;
+        position: relative;
+      }
+      .time-input-wrap {
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        align-items: center;
+        gap: 10px;
+      }
+      .time-box .field {
+        text-align: center;
+        font-size: clamp(34px, 5vw, 56px);
+        font-weight: 950;
+        border-bottom-color: rgba(255, 255, 255, 0.22);
+        -moz-appearance: textfield;
+      }
+      .time-box .field::-webkit-outer-spin-button,
+      .time-box .field::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      .stepper-btn {
+        width: 44px;
+        height: 54px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 26px;
+        font-weight: 950;
+        cursor: pointer;
+        transition:
+          transform 0.14s ease,
+          background 0.14s ease,
+          color 0.14s ease;
+      }
+      .stepper-btn:hover {
+        background: rgba(217, 176, 106, 0.18);
+        color: white;
+        transform: translateY(-1px);
+      }
+      .stepper-btn:active {
+        transform: translateY(1px);
+      }
+      .unit {
+        color: rgba(255, 255, 255, 0.68);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 900;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+      .cta-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .btn {
+        border: 0;
+        cursor: pointer;
+        user-select: none;
+        border-radius: 999px;
+        padding: 15px 22px;
+        font-weight: 950;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+        transition:
+          transform 0.14s ease,
+          box-shadow 0.14s ease,
+          filter 0.14s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.05);
+      }
+      .btn:active {
+        transform: translateY(1px) scale(0.99);
+      }
+      .btn-primary {
+        color: var(--ink);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.92),
+          rgba(247, 246, 242, 0.88)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        box-shadow:
+          0 16px 42px rgba(0, 0, 0, 0.22),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.08);
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #fffaf0, #ead7b2);
+      }
+      .btn-dark {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      }
+      .btn-paper {
+        color: var(--ink);
+        background: white;
+        box-shadow:
+          0 14px 38px rgba(0, 0, 0, 0.16),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.08);
+      }
+      .btn-danger {
+        color: white;
+        background: linear-gradient(135deg, #e00202, #950000);
+        box-shadow:
+          0 14px 36px rgba(255, 91, 91, 0.22),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.18);
+      }
+      .btn-giant {
+        min-height: 74px;
+        padding: 20px 32px;
+        font-size: clamp(22px, 2.5vw, 34px);
+        border-radius: 24px;
+      }
+      .text-cta {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 18px 12px;
+        font-size: clamp(30px, 4.4vw, 52px);
+        font-weight: 950;
+        letter-spacing: 0.035em;
+        text-align: center;
+      }
+      .text-cta:hover {
+        background: transparent;
+        box-shadow: none;
+        transform: translateY(-1px);
+      }
+      .text-cta:active {
+        transform: translateY(2px) scale(0.985);
+        text-shadow: none;
+      }
+      .text-cta:focus-visible {
+        outline: 3px solid rgba(217, 176, 106, 0.75);
+        outline-offset: 6px;
+        border-radius: 12px;
+      }
+      .text-cta-dark {
+        color: var(--ink);
+      }
+      .text-cta-dark:hover {
+        color: #1c1b16;
+        text-shadow: 0 10px 28px rgba(217, 176, 106, 0.22);
+      }
+      .text-cta-light {
+        color: white;
+      }
+      .text-cta-light:hover {
+        color: #fff0c9;
+        text-shadow: 0 10px 28px rgba(217, 176, 106, 0.22);
+      }
+      .arrow::after {
+        content: "›";
+        font-size: 1.25em;
+        line-height: 0;
+      }
+      .arrow-left::before {
+        content: "‹";
+        font-size: 1.25em;
+        line-height: 0;
+      }
+      .arrow-left::after {
+        content: none;
+      }
+      .side-eyebrow {
+        color: var(--accent);
+        text-transform: uppercase;
+        font-weight: 950;
+        letter-spacing: 0.12em;
+        margin-bottom: 18px;
+      }
+      .side-big {
+        font-size: clamp(34px, 4vw, 56px);
+        line-height: 0.96;
+        font-weight: 950;
+        letter-spacing: -0.05em;
+        text-transform: uppercase;
+        margin: 0;
+      }
+      .side-text {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 18px;
+        line-height: 1.55;
+        margin: 18px 0 0;
+      }
+      .task-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 22px;
+      }
+      .task-row {
+        /* CHANGE THIS: Add an 'auto' column at the start for the drag handle */
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.68);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 18px;
+        padding: 10px 10px 10px 16px;
+        /* Add transition for smooth drag feedback */
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .task-row input {
+        border: 0;
+        background: transparent;
+        outline: 0;
+        color: var(--ink);
+        font-size: 20px;
+        font-weight: 750;
+        min-width: 0;
+      }
+      .icon-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: #11131f;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 22px;
+        font-weight: 950;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        box-shadow:
+          0 8px 18px rgba(0, 0, 0, 0.18),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.28);
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease,
+          background 0.12s ease,
+          color 0.12s ease,
+          border-color 0.12s ease;
+      }
+      .icon-btn:hover {
+        background: linear-gradient(135deg, #e00202, #950000);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px) rotate(3deg);
+        box-shadow:
+          0 12px 24px rgba(255, 91, 91, 0.26),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.24);
+      }
+      .icon-btn:active {
+        transform: translateY(1px) scale(0.94) rotate(0deg);
+        box-shadow:
+          0 3px 8px rgba(0, 0, 0, 0.24),
+          inset 0 2px 4px rgba(0, 0, 0, 0.32);
+        filter: brightness(0.94);
+      }
+      .icon-btn:focus-visible {
+        outline: 3px solid rgba(217, 176, 106, 0.75);
+        outline-offset: 3px;
+      }
+      .active-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 28px;
+        align-items: stretch;
+      }
+      .timer-card {
+        min-height: 650px;
+        overflow: hidden;
+        border-radius: 28px;
+        position: relative;
+        background:
+          radial-gradient(
+            circle at 16% 12%,
+            rgba(155, 92, 33, 0.42),
+            transparent 26%
+          ),
+          radial-gradient(
+            circle at 86% 76%,
+            rgba(25, 74, 135, 0.52),
+            transparent 32%
+          ),
+          linear-gradient(155deg, #3b2713 0%, #161621 45%, #080914 100%);
+        box-shadow:
+          0 28px 90px rgba(0, 0, 0, 0.42),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      }
+      .timer-hero {
+        display: grid;
+        place-items: center;
+        min-height: 330px;
+        color: white;
+        padding: 30px;
+      }
+      .big-timer {
+        font-size: clamp(76px, 13vw, 168px);
+        line-height: .9;
+        font-weight: 250;
+        letter-spacing: -.06em;
+        text-shadow: 0 18px 55px rgba(0,0,0,.35);
+        font-variant-numeric: tabular-nums;
+        transition: color .2s ease, text-shadow .2s ease;
+      }
+
+      .big-timer.timer-warning {
+        color: #ffd166;
+        text-shadow:
+          0 18px 55px rgba(0,0,0,.35),
+          0 0 24px rgba(255, 209, 102, .35);
+      }
+
+      .big-timer.timer-danger {
+        color: #ff5b5b;
+        text-shadow:
+          0 18px 55px rgba(0,0,0,.35),
+          0 0 28px rgba(255, 91, 91, .42);
+      }
+      .focus-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 22px;
+        align-items: center;
+      }
+.focus-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+  width: max-content;
+  max-width: 320px;
+}
+
+.focus-actions .btn-giant {
+  width: 300px;
+  min-height: 70px;
+  padding-inline: 24px;
+}
+
+.btn-skip {
+  width: 240px;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 18px;
+
+  color: #3f3f46;
+  background: rgba(16, 16, 20, 0.06);
+  border: 1px solid rgba(16, 16, 20, 0.12);
+
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.05),
+    0 10px 28px rgba(0, 0, 0, 0.08);
+}
+
+.btn-skip:hover {
+  color: var(--ink);
+  background: rgba(217, 176, 106, 0.18);
+  border-color: rgba(217, 176, 106, 0.42);
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.06),
+    0 14px 32px rgba(217, 176, 106, 0.18);
+}
+
+.btn-skip:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.focus-title {
   font-size: clamp(30px, 4vw, 54px);
   line-height: .98;
   font-weight: 850;
   letter-spacing: -.045em;
   color: #404047;
 
-  max-height: 3.05em;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
+  max-height: none;
+  overflow: visible;
+  display: block;
   overflow-wrap: anywhere;
 }
-
 .focus-title.long-task {
-  font-size: clamp(26px, 3.2vw, 42px);
+  font-size: clamp(28px, 3.4vw, 42px);
   line-height: 1.05;
   letter-spacing: -.035em;
 }
 
 .focus-title.very-long-task {
-  font-size: clamp(22px, 2.6vw, 34px);
+  font-size: clamp(24px, 2.8vw, 34px);
   line-height: 1.12;
   letter-spacing: -.025em;
-  max-height: 3.45em;
 }
 
 .focus-title.insane-long-task {
-  font-size: clamp(18px, 2.1vw, 28px);
+  font-size: clamp(20px, 2.3vw, 28px);
   line-height: 1.16;
   letter-spacing: -.015em;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  max-height: 4.7em;
 }
-
-    .mission-side-panel {
-      border-radius: 28px;
-      padding: 26px;
-      color: white;
-      border: 1px solid rgba(255,255,255,.1);
-      background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
-      box-shadow: 0 28px 90px rgba(0,0,0,.28);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .stat-card {
-      border-radius: 22px;
-      padding: 22px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-    }
-
-    .break-bank {
-      font-size: clamp(44px, 5vw, 68px);
-      font-weight: 420;
-      line-height: .92;
-      letter-spacing: .015em;
-      color: white;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .task-mini-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 16px;
-      max-height: 190px;
-      overflow: auto;
-      padding-right: 6px;
-    }
-
-    .task-pill {
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.75);
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .task-pill.done {
-      color: rgba(255,255,255,.42);
-      text-decoration: line-through;
-    }
-
-    .task-pill.active-task {
-      background: rgba(217,176,106,.18);
-      color: white;
-      box-shadow: inset 4px 0 0 var(--accent);
-    }
-
-    .give-up-link {
-      margin-top: auto;
-      border: 0;
-      background: transparent;
-      color: rgba(255,255,255,.5);
-      font-weight: 850;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      cursor: pointer;
-      padding: 12px 0 0;
-      text-align: left;
-    }
-
-    .give-up-link:hover { color: white; }
-
-    .break-page-card,
-    .result-page-card {
-      min-height: 650px;
-      border-radius: 28px;
-      overflow: hidden;
-      position: relative;
-      background:
-        radial-gradient(circle at 26% 18%, rgba(217, 176, 106, .22), transparent 28%),
-        linear-gradient(155deg, #312111, #11131f 52%, #070815);
-      box-shadow: 0 28px 90px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.08);
-    }
-
-    .center-stack {
-      min-height: 650px;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      color: white;
-      padding: 44px;
-    }
-
-    .result-title {
-      margin: 0;
-      font-size: clamp(56px, 10vw, 128px);
-      line-height: .86;
-      font-weight: 950;
-      letter-spacing: -.07em;
-      text-transform: uppercase;
-    }
-
-    .result-card {
-      background: var(--paper);
-      color: var(--ink);
-      padding: 36px;
-      margin: 34px auto;
-      max-width: 720px;
-      clip-path: polygon(0 0, 100% 8%, 100% 100%, 0 92%);
-    }
-
-    .result-text {
-      margin: 0;
-      font-size: clamp(30px, 4vw, 56px);
-      line-height: 1.04;
-      font-weight: 850;
-      letter-spacing: -.045em;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      display: none;
-      place-items: center;
-      z-index: 100;
-      background: rgba(3,3,8,.72);
-      backdrop-filter: blur(12px);
-      padding: 22px;
-    }
-
-    .modal-backdrop.show { display: grid; }
-
-    .modal {
-      width: min(680px, 100%);
-      border-radius: 28px;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at top right, rgba(217, 176, 106, .2), transparent 35%),
-        #11131f;
-      box-shadow: 0 30px 100px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.1);
-    }
-
-    .modal-actions {
-      padding: 26px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      background: var(--paper);
-    }
-
-    .modal-actions.compact-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      align-items: stretch;
-      padding: 22px 26px 26px;
-    }
-
-    .modal-actions.compact-actions .btn {
-      min-height: 58px;
-      padding: 14px 18px;
-      border-radius: 18px;
-      font-size: clamp(15px, 1.45vw, 20px);
-      letter-spacing: .045em;
-      white-space: nowrap;
-    }
-
-    .btn-quiet-dark {
-      color: rgba(255,255,255,.9);
-      background:
-        radial-gradient(circle at 20% 0%, rgba(217,176,106,.12), transparent 38%),
-        linear-gradient(135deg, #222331, #070815);
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 14px 34px rgba(0,0,0,.22), inset 0 -2px 0 rgba(0,0,0,.28);
-    }
-
-    .btn-quiet-dark:hover {
-      color: white;
-      background:
-        radial-gradient(circle at 20% 0%, rgba(217,176,106,.2), transparent 38%),
-        linear-gradient(135deg, #2c2e3e, #0b0d16);
-    }
-
-    .hidden { display: none !important; }
-
-    @media (max-width: 900px) {
-      .hero-layout,
-      .active-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .side-card,
       .mission-side-panel {
-        min-height: auto;
+        border-radius: 28px;
+        padding: 26px;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.09),
+          rgba(255, 255, 255, 0.035)
+        );
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
       }
-
-      .mission-card,
-      .timer-card,
+      .stat-card {
+        border-radius: 22px;
+        padding: 22px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .break-bank {
+        font-size: clamp(44px, 5vw, 68px);
+        font-weight: 420;
+        line-height: 0.92;
+        letter-spacing: 0.015em;
+        color: white;
+        font-variant-numeric: tabular-nums;
+      }
+      .task-mini-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 16px;
+        max-height: 190px;
+        overflow: auto;
+        padding-right: 6px;
+      }
+      .task-pill {
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .task-pill.done {
+        color: rgba(255, 255, 255, 0.42);
+        text-decoration: line-through;
+      }
+      .task-pill.active-task {
+        background: rgba(217, 176, 106, 0.18);
+        color: white;
+        box-shadow: inset 4px 0 0 var(--accent);
+      }
+      .give-up-link {
+        margin-top: auto;
+        border: 0;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 850;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        padding: 12px 0 0;
+        text-align: left;
+      }
+      .give-up-link:hover {
+        color: white;
+      }
       .break-page-card,
       .result-page-card {
-        min-height: 560px;
+        min-height: 650px;
+        border-radius: 28px;
+        overflow: hidden;
+        position: relative;
+        background:
+          radial-gradient(
+            circle at 26% 18%,
+            rgba(217, 176, 106, 0.22),
+            transparent 28%
+          ),
+          linear-gradient(155deg, #312111, #11131f 52%, #070815);
+        box-shadow:
+          0 28px 90px rgba(0, 0, 0, 0.42),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08);
       }
-
-      .setup-stack { min-height: 560px; }
-      .timer-hero { min-height: 250px; }
-    }
-
-    @media (max-width: 560px) {
-      .topbar-inner,
-      .stage { width: min(100vw - 22px, var(--max)); }
-      .topbar-inner { height: 62px; }
-      .top-meta { display: none; }
-      .stage { padding-top: 18px; }
-      .mission-card,
-      .timer-card,
-      .side-card,
-      .mission-side-panel,
-      .break-page-card,
-      .result-page-card {
+      .center-stack {
+        min-height: 650px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: white;
+        padding: 44px;
+      }
+      .result-title {
+        margin: 0;
+        font-size: clamp(56px, 10vw, 128px);
+        line-height: 0.86;
+        font-weight: 950;
+        letter-spacing: -0.07em;
+        text-transform: uppercase;
+      }
+      .result-card {
+        background: var(--paper);
+        color: var(--ink);
+        padding: 36px;
+        margin: 34px auto;
+        max-width: 720px;
+        clip-path: polygon(0 0, 100% 8%, 100% 100%, 0 92%);
+      }
+      .result-text {
+        margin: 0;
+        font-size: clamp(30px, 4vw, 56px);
+        line-height: 1.04;
+        font-weight: 850;
+        letter-spacing: -0.045em;
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        z-index: 100;
+        background: rgba(3, 3, 8, 0.72);
+        backdrop-filter: blur(12px);
+        padding: 22px;
+      }
+      .modal-backdrop.show {
+        display: grid;
+      }
+      .modal {
+        width: min(680px, 100%);
+        border-radius: 28px;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            circle at top right,
+            rgba(217, 176, 106, 0.2),
+            transparent 35%
+          ),
+          #11131f;
+        box-shadow:
+          0 30px 100px rgba(0, 0, 0, 0.5),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      }
+      .modal-actions {
+        padding: 26px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        background: var(--paper);
+      }
+      .modal-actions.compact-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        align-items: stretch;
+        padding: 22px 26px 26px;
+      }
+      .modal-actions.compact-actions .btn {
+        min-height: 58px;
+        padding: 14px 18px;
         border-radius: 18px;
+        font-size: clamp(15px, 1.45vw, 20px);
+        letter-spacing: 0.045em;
+        white-space: nowrap;
       }
-      .slab { padding: 28px 22px; }
-      .time-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .time-box { padding: 14px 10px; border-radius: 18px; }
-      .time-input-wrap { grid-template-columns: 34px 1fr 34px; gap: 6px; }
-      .stepper-btn { width: 34px; height: 44px; border-radius: 14px; font-size: 22px; }
-      .time-box .field { font-size: clamp(30px, 10vw, 44px); padding: 6px 0 8px; }
-      .unit { font-size: 11px; letter-spacing: .07em; margin-top: 8px; }
-      .focus-grid { grid-template-columns: 1fr; }
-      .btn-giant { width: 100%; }
-      .modal-actions { display: grid; }
-      .modal-actions.compact-actions { grid-template-columns: 1fr; }
-    }
-
-    .sound-toggle {
-  border: 1px solid rgba(255,255,255,.16);
-  background: rgba(255,255,255,.06);
-  color: rgba(255,255,255,.8);
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    background .14s ease,
-    color .14s ease,
-    border-color .14s ease,
-    transform .14s ease;
+      .btn-quiet-dark {
+        color: rgba(255, 255, 255, 0.9);
+        background:
+          radial-gradient(
+            circle at 20% 0%,
+            rgba(217, 176, 106, 0.12),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #222331, #070815);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow:
+          0 14px 34px rgba(0, 0, 0, 0.22),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.28);
+      }
+      .btn-quiet-dark:hover {
+        color: white;
+        background:
+          radial-gradient(
+            circle at 20% 0%,
+            rgba(217, 176, 106, 0.2),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #2c2e3e, #0b0d16);
+      }
+      .hidden {
+        display: none !important;
+      }
+      @media (max-width: 900px) {
+        .hero-layout,
+        .active-layout {
+          grid-template-columns: 1fr;
+        }
+        .side-card,
+        .mission-side-panel {
+          min-height: auto;
+        }
+        .mission-card,
+        .timer-card,
+        .break-page-card,
+        .result-page-card {
+          min-height: 560px;
+        }
+        .setup-stack {
+          min-height: 560px;
+        }
+        .timer-hero {
+          min-height: 250px;
+        }
+      }
+      @media (max-width: 560px) {
+        .topbar-inner,
+        .stage {
+          width: min(100vw - 22px, var(--max));
+        }
+        .topbar-inner {
+          height: 62px;
+        }
+        .top-meta {
+          display: none;
+        }
+        .stage {
+          padding-top: 18px;
+        }
+        .mission-card,
+        .timer-card,
+        .side-card,
+        .mission-side-panel,
+        .break-page-card,
+        .result-page-card {
+          border-radius: 18px;
+        }
+        .slab {
+          padding: 28px 22px;
+        }
+        .time-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+        .time-box {
+          padding: 14px 10px;
+          border-radius: 18px;
+        }
+        .time-input-wrap {
+          grid-template-columns: 34px 1fr 34px;
+          gap: 6px;
+        }
+        .stepper-btn {
+          width: 34px;
+          height: 44px;
+          border-radius: 14px;
+          font-size: 22px;
+        }
+        .time-box .field {
+          font-size: clamp(30px, 10vw, 44px);
+          padding: 6px 0 8px;
+        }
+        .unit {
+          font-size: 11px;
+          letter-spacing: 0.07em;
+          margin-top: 8px;
+        }
+.focus-grid {
+  grid-template-columns: 1fr;
 }
 
-.sound-toggle:hover {
-  color: white;
-  border-color: rgba(217,176,106,.55);
-  background: rgba(217,176,106,.12);
-  transform: translateY(-1px);
+.focus-actions {
+  width: 100%;
+  max-width: none;
+  align-items: stretch;
 }
 
-.sound-toggle:active {
-  transform: translateY(1px) scale(.98);
+.focus-actions .btn-giant,
+.btn-skip {
+  width: 100%;
 }
+        .btn-giant {
+          width: 100%;
+        }
+        .modal-actions {
+          display: grid;
+        }
+        .modal-actions.compact-actions {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sound-toggle {
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 13px;
+        font-weight: 950;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+          background 0.14s ease,
+          color 0.14s ease,
+          border-color 0.14s ease,
+          transform 0.14s ease;
+      }
+      .sound-toggle:hover {
+        color: white;
+        border-color: rgba(217, 176, 106, 0.55);
+        background: rgba(217, 176, 106, 0.12);
+        transform: translateY(-1px);
+      }
+      .sound-toggle:active {
+        transform: translateY(1px) scale(0.98);
+      }
+      .sound-toggle.off {
+        color: rgba(255, 255, 255, 0.42);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .brand-text {
+        border: 0;
+        background: transparent;
+        color: white;
+        padding: 0;
+        font: inherit;
+        font-weight: 950;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: color .14s ease, transform .14s ease, text-shadow .14s ease;
+      }
 
-.sound-toggle.off {
-  color: rgba(255,255,255,.42);
-  background: rgba(255,255,255,.03);
-}
-  </style>
-</head>
-<body>
-  <main class="app-shell">
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="brand"><button class="brand-mark" type="button" onclick="jumpToStart()" title="Jump to start">!</button> Get Shit Done</div>
-        <div class="top-meta">
-  <span class="dot"></span>
-  <span id="clock">22:27</span>
-  <button id="sound-toggle" class="sound-toggle" type="button" onclick="toggleSound()">Sound ON</button>
-  <span>No account. No cloud. Just work.</span>
-</div>
-      </div>
-    </header>
+      .brand-text:hover {
+        color: var(--accent);
+        transform: translateY(-1px);
+        text-shadow: 0 8px 22px rgba(217, 176, 106, .28);
+      }
 
-    <section class="stage">
-      <div id="setup-page" class="page active">
-        <div class="hero-layout">
-          <section class="mission-card setup-stack landing-card">
-            <div class="slab dark tilt-a" style="padding-top: 70px; padding-bottom: 66px;">
-              <div class="one-line-select">
-                <span>One</span>
-                <span class="select-wrap">
-                  <select id="hero-name" class="select-field">
-                    <option value="man">Man</option>
-                    <option value="woman">Woman</option>
-                    <option value="human" selected>Human</option>
-                  </select>
-                </span>
+      .brand-text:active {
+        transform: translateY(1px) scale(.98);
+      }
+
+      .brand-text:focus-visible {
+        outline: 3px solid rgba(217,176,106,.75);
+        outline-offset: 4px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <button
+              class="brand-mark"
+              type="button"
+              onclick="jumpToStart()"
+              title="Jump to start"
+            >
+              !
+            </button>
+
+            <button
+              class="brand-text"
+              type="button"
+              onclick="jumpToStart()"
+              title="Jump to start"
+            >
+              Get Shit Done
+            </button>
+          </div>
+          <div class="top-meta">
+            <span class="dot"></span>
+            <span id="clock">22:27</span>
+            <button
+              id="sound-toggle"
+              class="sound-toggle"
+              type="button"
+              onclick="toggleSound()"
+            >
+              Sound ON
+            </button>
+            <span>Based on Get Shit Done by plafhop</span>
+          </div>
+        </div>
+      </header>
+      <section class="stage">
+        <div id="setup-page" class="page active">
+          <div class="hero-layout">
+            <section class="mission-card setup-stack landing-card">
+              <div
+                class="slab dark tilt-a"
+                style="padding-top: 70px; padding-bottom: 66px"
+              >
+                <div class="one-line-select">
+                  <span>One</span>
+                  <span class="select-wrap">
+                    <select id="hero-name" class="select-field">
+                      <option value="man">Man</option>
+                      <option value="woman">Woman</option>
+                      <option value="human" selected>Human</option>
+                    </select>
+                  </span>
+                </div>
               </div>
-            </div>
-
-            <div class="slab white tilt-b" style="padding-top: 44px; padding-bottom: 46px;">
-              <div class="kicker">One mission</div>
-              <input id="mission-title" class="field" value="Finish report" />
-            </div>
-
-            <div class="slab dark tilt-c" style="padding-top: 44px; padding-bottom: 50px;">
-              <div class="kicker">Countdown length</div>
-              <div class="time-grid">
-                <div class="time-box">
-                  <div class="time-input-wrap">
-                    <button class="stepper-btn" type="button" onclick="stepNumber('mission-hours', -1)">−</button>
-                    <input id="mission-hours" class="field" type="number" value="1" min="0" />
-                    <button class="stepper-btn" type="button" onclick="stepNumber('mission-hours', 1)">+</button>
+              <div
+                class="slab white tilt-b"
+                style="padding-top: 44px; padding-bottom: 46px"
+              >
+                <div class="kicker">One mission</div>
+                <input id="mission-title" class="field" value="Finish report" />
+              </div>
+              <div
+                class="slab dark tilt-c"
+                style="padding-top: 44px; padding-bottom: 50px"
+              >
+                <div class="kicker">Countdown length</div>
+                <div class="time-grid">
+                  <div class="time-box">
+                    <div class="time-input-wrap">
+                      <button
+                        class="stepper-btn"
+                        type="button"
+                        onclick="stepNumber('mission-hours', -1)"
+                      >
+                        −
+                      </button>
+                      <input
+                        id="mission-hours"
+                        class="field"
+                        type="number"
+                        value="1"
+                        min="0"
+                      />
+                      <button
+                        class="stepper-btn"
+                        type="button"
+                        onclick="stepNumber('mission-hours', 1)"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div class="unit">hour(s)</div>
                   </div>
-                  <div class="unit">hour(s)</div>
-                </div>
-                <div class="time-box">
-                  <div class="time-input-wrap">
-                    <button class="stepper-btn" type="button" onclick="stepNumber('mission-minutes', -5)">−</button>
-                    <input id="mission-minutes" class="field" type="text" inputmode="numeric" value="30" min="0" max="59" onblur="formatMinuteInput(this)" />
-                    <button class="stepper-btn" type="button" onclick="stepNumber('mission-minutes', 5)">+</button>
+                  <div class="time-box">
+                    <div class="time-input-wrap">
+                      <button
+                        class="stepper-btn"
+                        type="button"
+                        onclick="stepNumber('mission-minutes', -5)"
+                      >
+                        −
+                      </button>
+                      <input
+                        id="mission-minutes"
+                        class="field"
+                        type="text"
+                        inputmode="numeric"
+                        value="30"
+                        min="0"
+                        max="59"
+                        onblur="formatMinuteInput(this)"
+                      />
+                      <button
+                        class="stepper-btn"
+                        type="button"
+                        onclick="stepNumber('mission-minutes', 5)"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div class="unit">minute(s)</div>
                   </div>
-                  <div class="unit">minute(s)</div>
                 </div>
               </div>
-            </div>
-
-            <div class="slab white" style="padding-top: 24px; padding-bottom: 24px;">
-              <button class="btn text-cta text-cta-dark arrow" onclick="goToStakes()">HOOO-AAAH!</button>
-            </div>
-          </section>
-
-          <aside class="side-card landing-side">
-            <div>
-              <div class="side-eyebrow">Based on the lost app</div>
-              <h1 class="side-big">Get Shit Done</h1>
-              <p class="side-text">One mission. One timer. Earn your break, bank it, and spend it when you actually need it.</p>
-            </div>
-            <div class="stat-card">
-              <div class="label">Default rules</div>
-              <p class="side-text" style="margin:0;">1 minute break per 6 minutes of work. +5 minutes every 30 focused minutes.</p>
-            </div>
-          </aside>
-        </div>
-      </div>
-
-      <div id="stakes-page" class="page">
-        <div class="hero-layout">
-          <section class="mission-card setup-stack">
-            <div class="slab dark tilt-a" style="padding-top: 58px; padding-bottom: 56px;">
-              <p class="quote">Doing this is essential, because the consequences will be cruel:</p>
-            </div>
-            <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 44px;">
-              <input id="consequence" class="field" value="" placeholder="10 push-ups" />
-            </div>
-            <div class="slab dark tilt-c" style="padding-top: 56px; padding-bottom: 58px;">
-              <p class="quote">However, the reward will be fantastic:</p>
-            </div>
-            <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 44px;">
-              <input id="reward" class="field" value="" placeholder="make yourself the hero" />
-            </div>
-            <div class="slab dark" style="padding-top: 24px; padding-bottom: 24px;">
-              <button class="btn text-cta text-cta-light arrow" onclick="goToTasks()">KABOOOM!</button>
-            </div>
-          </section>
-
-          <aside class="side-card">
-            <div>
-              <div class="side-eyebrow">Self-contract</div>
-              <h2 class="side-big">Make the stakes visible.</h2>
-              <p class="side-text">The consequence is not for shame. It gives the mission weight. The reward gives the finish line a shape.</p>
-            </div>
-            <button class="btn btn-dark arrow-left" onclick="showPage('setup-page')">Back to mission setup</button>
-          </aside>
-        </div>
-      </div>
-
-      <div id="tasks-page" class="page">
-        <div class="hero-layout">
-          <section class="mission-card setup-stack">
-            <div class="slab dark tilt-a" style="padding-top: 50px; padding-bottom: 48px;">
-              <p class="quote">Break the impossible into smaller targets.</p>
-            </div>
-            <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 46px;">
-              <div class="kicker">Your battle plan</div>
-              <h2 class="mission-title">Targets</h2>
-              <div id="task-list" class="task-list"></div>
-              <button class="btn btn-paper" style="margin-top:12px;" onclick="addTask('')">+ Add target</button>
-            </div>
-            <div class="slab dark tilt-c" style="padding-top: 44px; padding-bottom: 46px;">
-              <div class="kicker">Break economy</div>
-              <p class="quote" style="font-size: clamp(24px, 2.7vw, 36px);">Finish targets. Earn break time. Save it until you actually want it.</p>
-            </div>
-            <div class="slab white" style="padding-top: 24px; padding-bottom: 24px;">
-              <button class="btn text-cta text-cta-dark arrow" onclick="startMission()">START MISSION</button>
-            </div>
-          </section>
-
-          <aside class="side-card">
-            <div>
-              <div class="side-eyebrow">Suggested targets</div>
-              <h2 class="side-big">Clear. Small. Finishable.</h2>
-              <p class="side-text">Use action phrases: “draft intro,” “clean diagram,” “send file.” The timer rewards completed targets, so avoid vague tasks.</p>
-            </div>
-            <button class="btn btn-dark arrow-left" onclick="showPage('stakes-page')">Back to stakes</button>
-          </aside>
-        </div>
-      </div>
-
-      <div id="active-page" class="page">
-        <div class="active-layout">
-          <section class="timer-card">
-            <div class="slab white" style="padding-top: 34px; padding-bottom: 38px;">
-              <div class="kicker">Your mission</div>
-              <h1 id="active-mission-title" class="mission-title">Finish report</h1>
-            </div>
-            <div class="timer-hero">
-              <div id="main-timer" class="big-timer">00:00</div>
-            </div>
-            <div class="slab white tilt-a" style="padding-top: 58px; padding-bottom: 70px;">
-              <div class="focus-grid">
-                <div>
-                  <div class="kicker" style="color:#363640;">Focus! Do this now</div>
-                  <div id="current-task" class="focus-title">Write introduction</div>
-                </div>
-                <button class="btn btn-primary btn-giant" onclick="completeTask()">BOOM! DONE!</button>
+              <div
+                class="slab white"
+                style="padding-top: 24px; padding-bottom: 24px"
+              >
+                <button
+                  class="btn text-cta text-cta-dark arrow"
+                  onclick="goToStakes()"
+                >
+                  HOOO-AAAH!
+                </button>
               </div>
+            </section>
+            <aside class="side-card landing-side">
+              <div>
+                <div class="side-eyebrow">Based on the lost app</div>
+                <h1 class="side-big">Get Shit Done</h1>
+                <p class="side-text">
+                  One mission. One timer. Earn your break, bank it, and spend it
+                  when you actually need it.
+                </p>
+              </div>
+              <div class="stat-card">
+                <div class="label">Default rules</div>
+                <p class="side-text" style="margin: 0">
+                  1 minute break per 6 minutes of work. +5 minutes every 30
+                  focused minutes.
+                </p>
+              </div>
+            </aside>
+          </div>
+        </div>
+        <div id="stakes-page" class="page">
+          <div class="hero-layout">
+            <section class="mission-card setup-stack">
+              <div
+                class="slab dark tilt-a"
+                style="padding-top: 58px; padding-bottom: 56px"
+              >
+                <p class="quote">
+                  Doing this is essential, because the consequences will be
+                  cruel:
+                </p>
+              </div>
+              <div
+                class="slab white tilt-b"
+                style="padding-top: 42px; padding-bottom: 44px"
+              >
+                <input
+                  id="consequence"
+                  class="field"
+                  value=""
+                  placeholder="10 push-ups"
+                />
+              </div>
+              <div
+                class="slab dark tilt-c"
+                style="padding-top: 56px; padding-bottom: 58px"
+              >
+                <p class="quote">However, the reward will be fantastic:</p>
+              </div>
+              <div
+                class="slab white tilt-b"
+                style="padding-top: 42px; padding-bottom: 44px"
+              >
+                <input
+                  id="reward"
+                  class="field"
+                  value=""
+                  placeholder="make yourself the hero"
+                />
+              </div>
+              <div
+                class="slab dark"
+                style="padding-top: 24px; padding-bottom: 24px"
+              >
+                <button
+                  class="btn text-cta text-cta-light arrow"
+                  onclick="goToTasks()"
+                >
+                  KABOOOM!
+                </button>
+              </div>
+            </section>
+            <aside class="side-card">
+              <div>
+                <div class="side-eyebrow">Self-contract</div>
+                <h2 class="side-big">Make the stakes visible.</h2>
+                <p class="side-text">
+                  The consequence is not for shame. It gives the mission weight.
+                  The reward gives the finish line a shape.
+                </p>
+              </div>
+              <button
+                class="btn btn-dark arrow-left"
+                onclick="showPage('setup-page')"
+              >
+                Back to mission setup
+              </button>
+            </aside>
+          </div>
+        </div>
+        <div id="tasks-page" class="page">
+          <div class="hero-layout">
+            <section class="mission-card setup-stack">
+              <div
+                class="slab dark tilt-a"
+                style="padding-top: 50px; padding-bottom: 48px"
+              >
+                <p class="quote">Break the impossible into smaller targets.</p>
+              </div>
+              <div
+                class="slab white tilt-b"
+                style="padding-top: 42px; padding-bottom: 46px"
+              >
+                <div class="kicker">Your battle plan</div>
+                <h2 class="mission-title">Targets</h2>
+                <div id="task-list" class="task-list"></div>
+                <button
+                  class="btn btn-paper"
+                  style="margin-top: 12px"
+                  onclick="addTask('')"
+                >
+                  + Add target
+                </button>
+              </div>
+              <div
+                class="slab dark tilt-c"
+                style="padding-top: 44px; padding-bottom: 46px"
+              >
+                <div class="kicker">Break economy</div>
+                <p class="quote" style="font-size: clamp(24px, 2.7vw, 36px)">
+                  Finish targets. Earn break time. Save it until you actually
+                  want it.
+                </p>
+              </div>
+              <div
+                class="slab white"
+                style="padding-top: 24px; padding-bottom: 24px"
+              >
+                <button
+                  class="btn text-cta text-cta-dark arrow"
+                  onclick="startMission()"
+                >
+                  START MISSION
+                </button>
+              </div>
+            </section>
+            <aside class="side-card">
+              <div>
+                <div class="side-eyebrow">Suggested targets</div>
+                <h2 class="side-big">Clear. Small. Finishable.</h2>
+                <p class="side-text">
+                  Use action phrases: “draft intro,” “clean diagram,” “send
+                  file.” The timer rewards completed targets, so avoid vague
+                  tasks.
+                </p>
+              </div>
+              <button
+                class="btn btn-dark arrow-left"
+                onclick="showPage('stakes-page')"
+              >
+                Back to stakes
+              </button>
+            </aside>
+          </div>
+        </div>
+        <div id="active-page" class="page">
+          <div class="active-layout">
+            <section class="timer-card">
+              <div
+                class="slab white"
+                style="padding-top: 34px; padding-bottom: 38px"
+              >
+                <div class="kicker">Your mission</div>
+                <h1 id="active-mission-title" class="mission-title">
+                  Finish report
+                </h1>
+              </div>
+              <div class="timer-hero">
+                <div id="main-timer" class="big-timer">00:00</div>
+              </div>
+              <div
+                class="slab white tilt-a"
+                style="padding-top: 58px; padding-bottom: 70px"
+              >
+                <div class="focus-grid">
+                  <div>
+                    <div class="kicker" style="color: #363640">
+                      Focus! Do this now
+                    </div>
+                    <div id="current-task" class="focus-title">
+                      Write introduction
+                    </div>
+                  </div>
+                  <div class="focus-actions">
+                    <button class="btn btn-primary btn-giant" onclick="completeTask()">
+                      BOOM! DONE!
+                    </button>
+
+                    <button class="btn btn-skip" onclick="skipTask()">
+                      Skip for now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <aside class="mission-side-panel">
+              <div class="stat-card">
+                <div class="label">Heroes need rest too</div>
+                <div id="break-bank" class="break-bank">00:00</div>
+                <button
+                  class="btn btn-paper arrow"
+                  style="margin-top: 18px; width: 100%"
+                  onclick="takeBreak()"
+                >
+                  Take a break
+                </button>
+              </div>
+              <div class="stat-card">
+                <div class="label">Targets</div>
+                <div id="mini-task-list" class="task-mini-list"></div>
+              </div>
+              <button
+                class="btn secondary"
+                onclick="openMiniTimer()"
+                title="Pop out a mini timer"
+              >
+                MINI PLAYER
+              </button>
+              <button class="give-up-link" onclick="failMission()">
+                I'm weak and give up ›
+              </button>
+            </aside>
+          </div>
+        </div>
+        <div id="break-page" class="page">
+          <section class="break-page-card center-stack">
+            <div>
+              <div class="side-eyebrow">Break time</div>
+              <h1 class="result-title" id="break-timer">00:00</h1>
+              <p
+                class="side-text"
+                style="max-width: 600px; margin: 26px auto 32px"
+              >
+                You earned this. Stop early and the unused time stays in your
+                bank.
+              </p>
+              <button
+                class="btn btn-primary btn-giant arrow"
+                onclick="returnToWork()"
+              >
+                Back to work
+              </button>
             </div>
           </section>
-
-          <aside class="mission-side-panel">
-            <div class="stat-card">
-              <div class="label">Heroes need rest too</div>
-              <div id="break-bank" class="break-bank">00:00</div>
-              <button class="btn btn-paper arrow" style="margin-top:18px; width:100%;" onclick="takeBreak()">Take a break</button>
-            </div>
-
-            <div class="stat-card">
-              <div class="label">Targets</div>
-              <div id="mini-task-list" class="task-mini-list"></div>
-            </div>
-            <button class="btn secondary" onclick="openMiniTimer()" title="Pop out a mini timer">
-  MINI PLAYER
-</button>
-
-            <button class="give-up-link" onclick="failMission()">I'm weak and give up ›</button>
-          </aside>
         </div>
-      </div>
-
-      <div id="break-page" class="page">
-        <section class="break-page-card center-stack">
-          <div>
-            <div class="side-eyebrow">Break time</div>
-            <h1 class="result-title" id="break-timer">00:00</h1>
-            <p class="side-text" style="max-width:600px; margin: 26px auto 32px;">You earned this. Stop early and the unused time stays in your bank.</p>
-            <button class="btn btn-primary btn-giant arrow" onclick="returnToWork()">Back to work</button>
-          </div>
-        </section>
-      </div>
-
-      <div id="result-page" class="page">
-        <section class="result-page-card center-stack">
-          <div>
-            <h1 class="result-title" id="result-title">Mission complete</h1>
-            <div class="result-card">
-              <div class="kicker" id="result-label">Your reward</div>
-              <p class="result-text" id="result-text">make yourself the hero</p>
+        <div id="result-page" class="page">
+          <section class="result-page-card center-stack">
+            <div>
+              <h1 class="result-title" id="result-title">Mission complete</h1>
+              <div class="result-card">
+                <div class="kicker" id="result-label">Your reward</div>
+                <p class="result-text" id="result-text">
+                  make yourself the hero
+                </p>
+              </div>
+              <button
+                class="btn btn-primary btn-giant arrow"
+                onclick="resetApp()"
+              >
+                Another mission
+              </button>
             </div>
-            <button class="btn btn-primary btn-giant arrow" onclick="resetApp()">Another mission</button>
-          </div>
-        </section>
-      </div>
-    </section>
-  </main>
-
-  <div id="empty-break-modal" class="modal-backdrop">
-    <div class="modal">
-      <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 52px;">
-        <p class="quote" style="color:#55555d;">Trying to rest with an empty bank? Bold strategy, hero.</p>
-      </div>
-      <div class="slab dark tilt-c" style="padding-top: 46px; padding-bottom: 52px;">
-        <div class="kicker">Emergency mercy break</div>
-        <p class="side-text" style="margin: 0 0 18px;">Add a tiny break if you need it. Then get back in the fight.</p>
-        <div class="time-grid" style="grid-template-columns: 1fr; max-width: 320px;">
-          <div class="time-box">
-            <div class="time-input-wrap">
-              <button class="stepper-btn" type="button" onclick="stepNumber('mercy-break-minutes', -1)">−</button>
-              <input id="mercy-break-minutes" class="field" type="number" value="3" min="1" max="30" />
-              <button class="stepper-btn" type="button" onclick="stepNumber('mercy-break-minutes', 1)">+</button>
+          </section>
+        </div>
+      </section>
+    </main>
+    <div id="empty-break-modal" class="modal-backdrop">
+      <div class="modal">
+        <div
+          class="slab white tilt-b"
+          style="padding-top: 42px; padding-bottom: 52px"
+        >
+          <p class="quote" style="color: #55555d">
+            Trying to rest with an empty bank? Bold strategy, hero.
+          </p>
+        </div>
+        <div
+          class="slab dark tilt-c"
+          style="padding-top: 46px; padding-bottom: 52px"
+        >
+          <div class="kicker">Emergency mercy break</div>
+          <p class="side-text" style="margin: 0 0 18px">
+            Add a tiny break if you need it. Then get back in the fight.
+          </p>
+          <div
+            class="time-grid"
+            style="grid-template-columns: 1fr; max-width: 320px"
+          >
+            <div class="time-box">
+              <div class="time-input-wrap">
+                <button
+                  class="stepper-btn"
+                  type="button"
+                  onclick="stepNumber('mercy-break-minutes', -1)"
+                >
+                  −
+                </button>
+                <input
+                  id="mercy-break-minutes"
+                  class="field"
+                  type="number"
+                  value="3"
+                  min="1"
+                  max="30"
+                />
+                <button
+                  class="stepper-btn"
+                  type="button"
+                  onclick="stepNumber('mercy-break-minutes', 1)"
+                >
+                  +
+                </button>
+              </div>
+              <div class="unit">minute(s)</div>
             </div>
-            <div class="unit">minute(s)</div>
           </div>
         </div>
-      </div>
-      <div class="modal-actions compact-actions">
-        <button class="btn btn-primary arrow" onclick="grantMercyBreak()">Fine. Tiny break.</button>
-        <button class="btn btn-quiet-dark" onclick="closeEmptyBreakModal()">No. Work harder.</button>
+        <div class="modal-actions compact-actions">
+          <button class="btn btn-primary arrow" onclick="grantMercyBreak()">
+            Fine. Tiny break.
+          </button>
+          <button class="btn btn-quiet-dark" onclick="closeEmptyBreakModal()">
+            No. Work harder.
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div id="extend-modal" class="modal-backdrop">
-    <div class="modal">
-      <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 52px;">
-        <p class="quote" style="color:#55555d;">Made a slight miscalculation or had to go save a puppy?</p>
-      </div>
-      <div class="slab dark tilt-c" style="padding-top: 46px; padding-bottom: 52px;">
-        <div class="kicker">Add emergency time</div>
-        <div class="time-grid" style="grid-template-columns: 1fr; max-width: 320px;">
-          <div class="time-box">
-            <div class="time-input-wrap">
-              <button class="stepper-btn" type="button" onclick="stepNumber('extend-minutes', -5)">−</button>
-              <input id="extend-minutes" class="field" type="number" value="10" min="1" />
-              <button class="stepper-btn" type="button" onclick="stepNumber('extend-minutes', 5)">+</button>
+    <div id="extend-modal" class="modal-backdrop">
+      <div class="modal">
+        <div
+          class="slab white tilt-b"
+          style="padding-top: 42px; padding-bottom: 52px"
+        >
+          <p class="quote" style="color: #55555d">
+            Made a slight miscalculation or had to go save a puppy?
+          </p>
+        </div>
+        <div
+          class="slab dark tilt-c"
+          style="padding-top: 46px; padding-bottom: 52px"
+        >
+          <div class="kicker">Add emergency time</div>
+          <div
+            class="time-grid"
+            style="grid-template-columns: 1fr; max-width: 320px"
+          >
+            <div class="time-box">
+              <div class="time-input-wrap">
+                <button
+                  class="stepper-btn"
+                  type="button"
+                  onclick="stepNumber('extend-minutes', -5)"
+                >
+                  −
+                </button>
+                <input
+                  id="extend-minutes"
+                  class="field"
+                  type="number"
+                  value="10"
+                  min="1"
+                />
+                <button
+                  class="stepper-btn"
+                  type="button"
+                  onclick="stepNumber('extend-minutes', 5)"
+                >
+                  +
+                </button>
+              </div>
+              <div class="unit">minute(s)</div>
             </div>
-            <div class="unit">minute(s)</div>
           </div>
         </div>
-      </div>
-      <div class="modal-actions compact-actions">
-        <button class="btn btn-primary arrow" onclick="extendMission()">That's all I need</button>
-        <button class="btn btn-quiet-dark" onclick="failMission()">No. I failed.</button>
+        <div class="modal-actions compact-actions">
+          <button class="btn btn-primary arrow" onclick="extendMission()">
+            That's all I need
+          </button>
+          <button class="btn btn-quiet-dark" onclick="failMission()">
+            No. I failed.
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    const state = {
-      missionTitle: 'Finish report',
-      consequence: '10 push-ups',
-      reward: 'make yourself the hero',
-      tasks: [],
-      activeTaskIndex: 0,
-      remainingSeconds: 0,
-      breakBankSeconds: 0,
-      breakRemainingSeconds: 0,
-      mode: 'setup',
-      timerId: null,
-      taskStartedAt: null,
-      focusedWorkSinceBonus: 0,
-      breakEarnRatio: 6,
-      intervalBonusEvery: 30 * 60,
-      intervalBonusAmount: 5 * 60,
+    <script>
+      // =========================================================
+      // State and Shortcuts
+      // =========================================================
 
-      soundEnabled: true,
-      audioContext: null
-    };
+      const state = {
+        missionTitle: "Finish report",
+        consequence: "10 push-ups",
+        reward: "make yourself the hero",
+        tasks: [],
+        activeTaskIndex: 0,
+        remainingSeconds: 0,
+        breakBankSeconds: 0,
+        breakRemainingSeconds: 0,
+        mode: "setup",
+        timerId: null,
+        taskStartedAt: null,
+        focusedWorkSinceBonus: 0,
+        breakEarnRatio: 6,
+        intervalBonusEvery: 30 * 60,
+        intervalBonusAmount: 5 * 60,
+        soundEnabled: true,
+        audioContext: null,
+      };
 
-    const $ = (id) => document.getElementById(id);
+      const $ = (id) => document.getElementById(id);
 
-    function ensureAudio() {
-  if (!state.soundEnabled) return null;
+      let draggedRow = null;
+      let pipTimerEl = null;
+      let pipTaskEl = null;
 
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContext) return null;
+      // =========================================================
+      // Audio and Notifications
+      // =========================================================
 
-  if (!state.audioContext) {
-    state.audioContext = new AudioContext();
-  }
+      function ensureAudio() {
+        if (!state.soundEnabled) return null;
 
-  if (state.audioContext.state === 'suspended') {
-    state.audioContext.resume();
-  }
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return null;
 
-  return state.audioContext;
-}
-
-// Keep track of our mini window elements
-let pipTimerEl = null;
-let pipTaskEl = null;
-
-async function openMiniTimer() {
-  if (!('documentPictureInPicture' in window)) {
-    alert("Your browser doesn't support the Mini Player API yet. Try Chrome or Edge!");
-    return;
-  }
-
-  try {
-    const pipWindow = await window.documentPictureInPicture.requestWindow({
-      width: 320,
-      height: 160,
-    });
-
-    // 1. Inject proper CSS to kill the white border and style the background
-    pipWindow.document.head.innerHTML = `
-      <style>
-        body {
-          margin: 0;
-          padding: 0;
-          height: 100vh;
-          /* Subtle dark gradient matching your app */
-          background: linear-gradient(145deg, #161621 0%, #050509 100%);
-          color: white;
-          font-family: Inter, Arial, Helvetica, sans-serif;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
+        if (!state.audioContext) {
+          state.audioContext = new AudioContext();
         }
-        #pip-timer {
-          font-size: clamp(3.5rem, 15vw, 5rem);
-          font-weight: 300; /* Much lighter, sleeker font weight */
-          line-height: 1;
-          letter-spacing: -0.04em;
-          font-variant-numeric: tabular-nums;
-          text-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        #pip-task {
-          font-size: 1.15rem;
-          font-weight: 500;
-          color: rgba(255, 255, 255, 0.75); /* Clearer, light gray text */
-          margin-top: 10px;
-          text-align: center;
-          padding: 0 20px;
-          /* Allow up to 2 lines for longer tasks before truncating */
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      </style>
-    `;
 
-    // 2. Add the clean HTML structure
-    pipWindow.document.body.innerHTML = `
+        if (state.audioContext.state === "suspended") {
+          state.audioContext.resume();
+        }
+
+        return state.audioContext;
+      }
+
+      function beep(freq, start, duration, type = "sine", gain = 0.045) {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+
+        const osc = ctx.createOscillator();
+        const volume = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+
+        volume.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+        volume.gain.exponentialRampToValueAtTime(
+          gain,
+          ctx.currentTime + start + 0.015,
+        );
+        volume.gain.exponentialRampToValueAtTime(
+          0.0001,
+          ctx.currentTime + start + duration,
+        );
+
+        osc.connect(volume).connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration + 0.03);
+      }
+
+      function playSound(kind) {
+        if (!state.soundEnabled) return;
+
+        const soundMap = {
+          start: [
+            [220, 0, 0.08, "square", 0.035],
+            [330, 0.09, 0.08, "square", 0.035],
+            [440, 0.18, 0.12, "square", 0.04],
+          ],
+          done: [
+            [392, 0, 0.07, "square", 0.04],
+            [523, 0.08, 0.1, "square", 0.045],
+          ],
+          break: [
+            [523, 0, 0.12, "sine", 0.035],
+            [659, 0.13, 0.18, "sine", 0.035],
+          ],
+          return: [
+            [330, 0, 0.07, "triangle", 0.035],
+            [247, 0.08, 0.1, "triangle", 0.03],
+          ],
+          success: [
+            [330, 0, 0.08, "square", 0.04],
+            [440, 0.09, 0.08, "square", 0.04],
+            [554, 0.18, 0.08, "square", 0.04],
+            [660, 0.28, 0.18, "square", 0.045],
+          ],
+          fail: [
+            [180, 0, 0.16, "sawtooth", 0.035],
+            [120, 0.18, 0.25, "sawtooth", 0.035],
+          ],
+          warning: [
+            [220, 0, 0.08, "square", 0.03],
+            [220, 0.14, 0.08, "square", 0.03],
+          ],
+          extend: [
+            [294, 0, 0.08, "triangle", 0.035],
+            [392, 0.1, 0.12, "triangle", 0.035],
+          ],
+        };
+
+        soundMap[kind]?.forEach((args) => beep(...args));
+      }
+
+      function toggleSound() {
+        state.soundEnabled = !state.soundEnabled;
+
+        const btn = $("sound-toggle");
+        btn.textContent = state.soundEnabled ? "Sound ON" : "Sound OFF";
+        btn.classList.toggle("off", !state.soundEnabled);
+
+        if (state.soundEnabled) {
+          playSound("done");
+        }
+      }
+
+      function requestNotificationPermission() {
+        if (
+          "Notification" in window &&
+          Notification.permission !== "granted" &&
+          Notification.permission !== "denied"
+        ) {
+          Notification.requestPermission();
+        }
+      }
+
+      function sendNotification(title, body) {
+        if (
+          !("Notification" in window) ||
+          Notification.permission !== "granted"
+        )
+          return;
+
+        new Notification(title, {
+          body,
+          icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>",
+        });
+      }
+
+      // =========================================================
+      // Navigation and Page Flow
+      // =========================================================
+
+      function showPage(id) {
+        document.querySelectorAll(".page").forEach((page) => {
+          page.classList.remove("active");
+        });
+
+        $(id).classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function goToStakes() {
+        state.missionTitle =
+          $("mission-title").value.trim() || "Unnamed mission";
+        showPage("stakes-page");
+      }
+
+      function goToTasks() {
+        state.consequence =
+          $("consequence").value.trim() || "accept the consequence";
+        state.reward = $("reward").value.trim() || "enjoy the victory";
+
+        if ($("task-list").children.length === 0) {
+          addTask("", "Write one clear target");
+        }
+
+        showPage("tasks-page");
+      }
+
+      function jumpToStart() {
+        const ok = confirm(
+          "Are you sure you want to jump back to the start? This will clear the current mission.",
+        );
+        if (!ok) return;
+
+        clearAllData();
+        showPage("setup-page");
+      }
+
+      // =========================================================
+      // Task Editor and Drag-and-Drop
+      // =========================================================
+
+      function addTask(
+        value = "",
+        placeholder = "Write one clear target",
+        afterRow = null,
+      ) {
+        const list = $("task-list");
+        const row = document.createElement("div");
+
+        row.className = "task-row";
+        row.draggable = true;
+        row.innerHTML = `
+    <div style="cursor: grab; color: #a1a1aa; font-weight: bold; padding-right: 5px; user-select: none;">⋮</div>
+    <input value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" onkeydown="handleTaskKeydown(event, this)" />
+    <button class="icon-btn" onclick="this.parentElement.remove()" title="Remove target">×</button>
+  `;
+
+        setupTaskDragHandlers(row, list);
+
+        if (afterRow && afterRow.parentElement === list) {
+          afterRow.insertAdjacentElement("afterend", row);
+        } else {
+          list.appendChild(row);
+        }
+
+        return row;
+      }
+
+      function setupTaskDragHandlers(row, list) {
+        row.addEventListener("dragstart", (event) => {
+          draggedRow = row;
+          event.dataTransfer.effectAllowed = "move";
+          row.style.opacity = "0.5";
+        });
+
+        row.addEventListener("dragend", () => {
+          draggedRow = null;
+          row.style.opacity = "1";
+          document.querySelectorAll(".task-row").forEach((el) => {
+            el.style.borderTop = "";
+          });
+        });
+
+        row.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+
+          if (draggedRow !== row) {
+            row.style.borderTop = "2px solid var(--accent)";
+          }
+        });
+
+        row.addEventListener("dragleave", () => {
+          row.style.borderTop = "";
+        });
+
+        row.addEventListener("drop", (event) => {
+          event.preventDefault();
+          row.style.borderTop = "";
+
+          if (draggedRow && draggedRow !== row) {
+            list.insertBefore(draggedRow, row);
+          }
+        });
+      }
+
+      function handleTaskKeydown(event, input) {
+        if (event.key !== "Enter") return;
+
+        event.preventDefault();
+
+        const newRow = addTask("", "Next target", input.parentElement);
+        const newInput = newRow.querySelector("input");
+        newInput.focus();
+      }
+
+      // =========================================================
+      // Form Inputs and Time Controls
+      // =========================================================
+
+      function stepNumber(id, delta) {
+        const input = $(id);
+        const min = input.min === "" ? -Infinity : parseInt(input.min, 10);
+        const max = input.max === "" ? Infinity : parseInt(input.max, 10);
+        const current = parseInt(input.value || "0", 10);
+        const next = Math.max(min, Math.min(max, current + delta));
+
+        if (id.includes("minutes")) {
+          input.value = String(next).padStart(2, "0");
+        } else {
+          input.value = next;
+        }
+      }
+
+      function formatMinuteInput(input) {
+        const min = input.min === "" ? 0 : parseInt(input.min, 10);
+        const max = input.max === "" ? 59 : parseInt(input.max, 10);
+        const value = Math.max(
+          min,
+          Math.min(max, parseInt(input.value || "0", 10)),
+        );
+
+        input.value = String(value).padStart(2, "0");
+      }
+
+      // =========================================================
+      // Mission Lifecycle
+      // =========================================================
+
+      function startMission() {
+        requestNotificationPermission();
+
+        const hours = Math.max(
+          0,
+          parseInt($("mission-hours").value || "0", 10),
+        );
+        const minutes = Math.max(
+          0,
+          parseInt($("mission-minutes").value || "0", 10),
+        );
+
+        state.remainingSeconds = Math.max(60, hours * 3600 + minutes * 60);
+        state.tasks = collectTasksFromEditor();
+
+        if (state.tasks.length === 0) {
+          state.tasks = [createTask(state.missionTitle)];
+        }
+
+        state.activeTaskIndex = 0;
+        state.breakBankSeconds = 0;
+        state.breakRemainingSeconds = 0;
+        state.focusedWorkSinceBonus = 0;
+        state.mode = "work";
+        state.taskStartedAt = Date.now();
+        state.tasks[0].status = "active";
+
+        $("active-mission-title").textContent = state.missionTitle;
+
+        updateDisplay();
+        showPage("active-page");
+        startTicking();
+        playSound("start");
+      }
+
+      function collectTasksFromEditor() {
+        return [...document.querySelectorAll("#task-list input")]
+          .map((input) => input.value.trim())
+          .filter(Boolean)
+          .map(createTask);
+      }
+
+      function createTask(title) {
+        return {
+          title,
+          status: "pending",
+          startedAt: null,
+          completedAt: null,
+          workDurationSeconds: 0,
+          breakEarnedSeconds: 0,
+        };
+      }
+
+      function completeTask() {
+        if (state.mode !== "work") return;
+
+        const task = state.tasks[state.activeTaskIndex];
+        const now = Date.now();
+
+        const duration = Math.max(
+          1,
+          Math.round((now - state.taskStartedAt) / 1000)
+        );
+
+        const earned = Math.round(duration / state.breakEarnRatio);
+
+        task.status = "done";
+        task.completedAt = now;
+        task.workDurationSeconds = duration;
+        task.breakEarnedSeconds = earned;
+
+        state.breakBankSeconds += earned;
+
+        if ("totalBreakEarnedSeconds" in state) {
+          state.totalBreakEarnedSeconds += earned;
+        }
+
+        playSound("done");
+
+        const nextIndex = state.tasks.findIndex(task => task.status !== "done");
+
+        if (nextIndex === -1) {
+          succeedMission();
+          return;
+        }
+
+        state.activeTaskIndex = nextIndex;
+        state.tasks[nextIndex].status = "active";
+
+        // Reset only after a task is completed.
+        // This starts a new earning period for the next completed target.
+        state.taskStartedAt = Date.now();
+
+        updateDisplay();
+      }
+
+      function skipTask() {
+        if (state.mode !== "work") return;
+        if (state.tasks.length <= 1) return;
+
+        const currentTask = state.tasks[state.activeTaskIndex];
+
+        currentTask.status = "pending";
+
+        state.tasks.splice(state.activeTaskIndex, 1);
+        state.tasks.push(currentTask);
+
+        const nextIndex = state.tasks.findIndex(task => task.status !== "done");
+
+        if (nextIndex === -1) {
+          succeedMission();
+          return;
+        }
+
+        state.activeTaskIndex = nextIndex;
+        state.tasks[state.activeTaskIndex].status = "active";
+
+        // Important:
+        // Do NOT reset state.taskStartedAt here.
+        // The work time should continue accumulating until any task is completed.
+
+        updateDisplay();
+      }
+
+      function takeBreak() {
+        if (state.mode !== "work") return;
+
+        if (state.breakBankSeconds <= 0) {
+          $("empty-break-modal").classList.add("show");
+          playSound("warning");
+          return;
+        }
+
+        state.mode = "break";
+        state.breakRemainingSeconds = state.breakBankSeconds;
+
+        updateDisplay();
+        showPage("break-page");
+        playSound("break");
+      }
+
+      function returnToWork() {
+        if (state.mode !== "break" && state.mode !== "paused") return;
+
+        state.mode = "work";
+        state.taskStartedAt = Date.now();
+
+        updateDisplay();
+        showPage("active-page");
+        playSound("return");
+      }
+
+      function extendMission() {
+        const add = Math.max(
+          1,
+          parseInt($("extend-minutes").value || "10", 10),
+        );
+
+        state.remainingSeconds += add * 60;
+        $("extend-modal").classList.remove("show");
+        state.mode = "work";
+        state.taskStartedAt = Date.now();
+
+        updateDisplay();
+        playSound("extend");
+      }
+
+      function succeedMission() {
+        clearInterval(state.timerId);
+        state.mode = "success";
+
+        $("result-title").textContent = "Mission complete";
+        $("result-label").textContent = "Your reward";
+        $("result-text").textContent = state.reward;
+
+        showPage("result-page");
+        playSound("success");
+      }
+
+      function failMission() {
+        clearInterval(state.timerId);
+        $("extend-modal").classList.remove("show");
+        state.mode = "failed";
+
+        $("result-title").textContent = "Mission failed";
+        $("result-label").textContent = "Your consequence";
+        $("result-text").textContent = state.consequence;
+
+        showPage("result-page");
+        playSound("fail");
+      }
+
+      function resetApp() {
+        clearAllData();
+        showPage("setup-page");
+      }
+
+      function clearAllData() {
+        clearInterval(state.timerId);
+        $("extend-modal").classList.remove("show");
+        $("empty-break-modal").classList.remove("show");
+
+        state.missionTitle = "Finish report";
+        state.consequence = "10 push-ups";
+        state.reward = "make yourself the hero";
+        state.tasks = [];
+        state.activeTaskIndex = 0;
+        state.remainingSeconds = 0;
+        state.breakBankSeconds = 0;
+        state.breakRemainingSeconds = 0;
+        state.mode = "setup";
+        state.timerId = null;
+        state.taskStartedAt = null;
+        state.focusedWorkSinceBonus = 0;
+
+        $("hero-name").value = "human";
+        $("mission-title").value = "Finish report";
+        $("mission-hours").value = 1;
+        $("mission-minutes").value = "30";
+        $("consequence").value = "";
+        $("reward").value = "";
+        $("task-list").innerHTML = "";
+        $("extend-minutes").value = 10;
+        $("mercy-break-minutes").value = 3;
+
+        updateDisplay();
+      }
+
+      // =========================================================
+      // Mercy Break Modal
+      // =========================================================
+
+      function closeEmptyBreakModal() {
+        $("empty-break-modal").classList.remove("show");
+      }
+
+      function grantMercyBreak() {
+        const minutes = Math.max(
+          1,
+          parseInt($("mercy-break-minutes").value || "3", 10),
+        );
+
+        state.breakBankSeconds += minutes * 60;
+        $("empty-break-modal").classList.remove("show");
+        takeBreak();
+      }
+
+      // =========================================================
+      // Timer Loop
+      // =========================================================
+
+      function startTicking() {
+        clearInterval(state.timerId);
+
+        state.timerId = setInterval(() => {
+          if (state.mode === "work") {
+            tickWorkTimer();
+          }
+
+          if (state.mode === "break") {
+            tickBreakTimer();
+          }
+
+          updateDisplay();
+        }, 1000);
+      }
+
+      function tickWorkTimer() {
+        state.remainingSeconds--;
+        state.focusedWorkSinceBonus++;
+
+        if (state.focusedWorkSinceBonus >= state.intervalBonusEvery) {
+          earnIntervalBonus();
+        }
+
+        if (state.remainingSeconds <= 0) {
+          pauseForEmergencyTime();
+        }
+      }
+
+      function tickBreakTimer() {
+        state.breakRemainingSeconds--;
+        state.breakBankSeconds = Math.max(0, state.breakBankSeconds - 1);
+
+        if (state.breakRemainingSeconds <= 0 || state.breakBankSeconds <= 0) {
+          returnToWork();
+        }
+      }
+
+      function earnIntervalBonus() {
+        state.breakBankSeconds += state.intervalBonusAmount;
+        state.focusedWorkSinceBonus = 0;
+
+        playSound("break");
+        sendNotification(
+          "Bonus Time Earned!",
+          "You've worked 30 mins. +5 minutes added to your break bank.",
+        );
+      }
+
+      function pauseForEmergencyTime() {
+        state.remainingSeconds = 0;
+        state.mode = "paused";
+
+        updateDisplay();
+        $("extend-modal").classList.add("show");
+        playSound("warning");
+        sendNotification(
+          "Timer Paused",
+          "Time is up! Add emergency time or accept your consequence.",
+        );
+      }
+
+      // =========================================================
+      // Mini Player / Picture-in-Picture
+      // =========================================================
+
+      async function openMiniTimer() {
+        if (!("documentPictureInPicture" in window)) {
+          alert(
+            "Your browser doesn't support the Mini Player API yet. Try Chrome or Edge!",
+          );
+          return;
+        }
+
+        try {
+          const pipWindow = await window.documentPictureInPicture.requestWindow(
+            {
+              width: 320,
+              height: 160,
+            },
+          );
+
+          pipWindow.document.head.innerHTML = getMiniPlayerStyles();
+          pipWindow.document.body.innerHTML = `
       <div id="pip-timer">00:00</div>
       <div id="pip-task">Loading...</div>
     `;
 
-    pipTimerEl = pipWindow.document.getElementById('pip-timer');
-    pipTaskEl = pipWindow.document.getElementById('pip-task');
+          pipTimerEl = pipWindow.document.getElementById("pip-timer");
+          pipTaskEl = pipWindow.document.getElementById("pip-task");
 
-    pipWindow.addEventListener("pagehide", () => {
-      pipTimerEl = null;
-      pipTaskEl = null;
-    });
+          pipWindow.addEventListener("pagehide", () => {
+            pipTimerEl = null;
+            pipTaskEl = null;
+          });
 
-    updateDisplay();
-
-  } catch (error) {
-    console.error("Failed to open Mini Player:", error);
-  }
-}
-
-
-
-function beep(freq, start, duration, type = 'sine', gain = 0.045) {
-  const ctx = ensureAudio();
-  if (!ctx) return;
-
-  const osc = ctx.createOscillator();
-  const volume = ctx.createGain();
-
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
-
-  volume.gain.setValueAtTime(0.0001, ctx.currentTime + start);
-  volume.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + start + 0.015);
-  volume.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
-
-  osc.connect(volume).connect(ctx.destination);
-
-  osc.start(ctx.currentTime + start);
-  osc.stop(ctx.currentTime + start + duration + 0.03);
-}
-
-function playSound(kind) {
-  if (!state.soundEnabled) return;
-
-  if (kind === 'start') {
-    beep(220, 0, .08, 'square', .035);
-    beep(330, .09, .08, 'square', .035);
-    beep(440, .18, .12, 'square', .04);
-  }
-
-  if (kind === 'done') {
-    beep(392, 0, .07, 'square', .04);
-    beep(523, .08, .1, 'square', .045);
-  }
-
-  if (kind === 'break') {
-    beep(523, 0, .12, 'sine', .035);
-    beep(659, .13, .18, 'sine', .035);
-  }
-
-  if (kind === 'return') {
-    beep(330, 0, .07, 'triangle', .035);
-    beep(247, .08, .1, 'triangle', .03);
-  }
-
-  if (kind === 'success') {
-    beep(330, 0, .08, 'square', .04);
-    beep(440, .09, .08, 'square', .04);
-    beep(554, .18, .08, 'square', .04);
-    beep(660, .28, .18, 'square', .045);
-  }
-
-  if (kind === 'fail') {
-    beep(180, 0, .16, 'sawtooth', .035);
-    beep(120, .18, .25, 'sawtooth', .035);
-  }
-
-  if (kind === 'warning') {
-    beep(220, 0, .08, 'square', .03);
-    beep(220, .14, .08, 'square', .03);
-  }
-
-  if (kind === 'extend') {
-    beep(294, 0, .08, 'triangle', .035);
-    beep(392, .1, .12, 'triangle', .035);
-  }
-}
-
-function sendNotification(title, body) {
-  // Check if browser supports notifications and if permission is granted
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(title, {
-      body: body,
-      icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>' // Cool lightning bolt emoji icon
-    });
-  }
-}
-
-function toggleSound() {
-  state.soundEnabled = !state.soundEnabled;
-
-  const btn = $('sound-toggle');
-  btn.textContent = state.soundEnabled ? 'Sound ON' : 'Sound OFF';
-  btn.classList.toggle('off', !state.soundEnabled);
-
-  if (state.soundEnabled) {
-    playSound('done');
-  }
-}
-
-    function showPage(id) {
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      $(id).classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function goToStakes() {
-      state.missionTitle = $('mission-title').value.trim() || 'Unnamed mission';
-      showPage('stakes-page');
-    }
-
-    function goToTasks() {
-      state.consequence = $('consequence').value.trim() || 'accept the consequence';
-      state.reward = $('reward').value.trim() || 'enjoy the victory';
-      if ($('task-list').children.length === 0) {
-        addTask('', 'Write one clear target');
-      }
-      showPage('tasks-page');
-    }
-
-let draggedRow = null; // Variable to keep track of the row being dragged
-
-    function addTask(value = '', placeholder = 'Write one clear target', afterRow = null) {
-      const list = $('task-list');
-      const row = document.createElement('div');
-      row.className = 'task-row';
-      row.draggable = true; // Makes the element draggable
-
-      // Added a drag handle (⋮⋮) to the HTML
-      row.innerHTML = `
-        <div style="cursor: grab; color: #a1a1aa; font-weight: bold; padding-right: 5px; user-select: none;">⋮</div>
-        <input value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" onkeydown="handleTaskKeydown(event, this)" />
-        <button class="icon-btn" onclick="this.parentElement.remove()" title="Remove target">×</button>
-      `;
-
-      // --- DRAG AND DROP LOGIC ---
-      row.addEventListener('dragstart', function(e) {
-        draggedRow = row;
-        e.dataTransfer.effectAllowed = 'move';
-        row.style.opacity = '0.5'; // Make it semi-transparent while dragging
-      });
-
-      row.addEventListener('dragend', function() {
-        draggedRow = null;
-        row.style.opacity = '1';
-        document.querySelectorAll('.task-row').forEach(el => el.style.borderTop = '');
-      });
-
-      row.addEventListener('dragover', function(e) {
-        e.preventDefault(); // Necessary to allow dropping
-        e.dataTransfer.dropEffect = 'move';
-        // Visual cue: show a line where it will drop
-        if (draggedRow !== this) {
-          this.style.borderTop = '2px solid var(--accent)';
+          updateDisplay();
+        } catch (error) {
+          console.error("Failed to open Mini Player:", error);
         }
-      });
-
-      row.addEventListener('dragleave', function() {
-        this.style.borderTop = ''; // Remove visual cue when mouse leaves
-      });
-
-      row.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.style.borderTop = '';
-        if (draggedRow !== this) {
-          // Move the dragged row before the row it was dropped onto
-          list.insertBefore(draggedRow, this);
-        }
-      });
-      // --- END DRAG AND DROP LOGIC ---
-
-      if (afterRow && afterRow.parentElement === list) {
-        afterRow.insertAdjacentElement('afterend', row);
-      } else {
-        list.appendChild(row);
       }
 
-      return row;
-    }
-
-    function handleTaskKeydown(event, input) {
-      if (event.key !== 'Enter') return;
-      event.preventDefault();
-      const newRow = addTask('', 'Next target', input.parentElement);
-      const newInput = newRow.querySelector('input');
-      newInput.focus();
-    }
-
-    function stepNumber(id, delta) {
-      const input = $(id);
-      const min = input.min === '' ? -Infinity : parseInt(input.min, 10);
-      const max = input.max === '' ? Infinity : parseInt(input.max, 10);
-      const current = parseInt(input.value || '0', 10);
-      let next = current + delta;
-      next = Math.max(min, Math.min(max, next));
-
-      if (id.includes('minutes')) {
-        input.value = String(next).padStart(2, '0');
-      } else {
-        input.value = next;
-      }
-    }
-
-    function formatMinuteInput(input) {
-      const min = input.min === '' ? 0 : parseInt(input.min, 10);
-      const max = input.max === '' ? 59 : parseInt(input.max, 10);
-      let value = parseInt(input.value || '0', 10);
-
-      value = Math.max(min, Math.min(max, value));
-      input.value = String(value).padStart(2, '0');
-    }
-
-    function startMission() {
-
-    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission();
-      }
-      const hours = Math.max(0, parseInt($('mission-hours').value || '0', 10));
-      const minutes = Math.max(0, parseInt($('mission-minutes').value || '0', 10));
-      state.remainingSeconds = Math.max(60, hours * 3600 + minutes * 60);
-      state.tasks = [...document.querySelectorAll('#task-list input')]
-        .map(input => input.value.trim())
-        .filter(Boolean)
-        .map(title => ({ title, status: 'pending', startedAt: null, completedAt: null, workDurationSeconds: 0, breakEarnedSeconds: 0 }));
-
-      if (state.tasks.length === 0) {
-        state.tasks = [{ title: state.missionTitle, status: 'pending', startedAt: null, completedAt: null, workDurationSeconds: 0, breakEarnedSeconds: 0 }];
+      function getMiniPlayerStyles() {
+        return `
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background: linear-gradient(145deg, #161621 0%, #050509 100%);
+        color: white;
+        font-family: Inter, Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
       }
 
-      state.activeTaskIndex = 0;
-      state.breakBankSeconds = 0;
-      state.breakRemainingSeconds = 0;
-      state.focusedWorkSinceBonus = 0;
-      state.mode = 'work';
-      state.taskStartedAt = Date.now();
-      state.tasks[0].status = 'active';
-      $('active-mission-title').textContent = state.missionTitle;
-      updateDisplay();
-      showPage('active-page');
-      startTicking();
-      playSound('start');
-    }
+      #pip-timer {
+        font-size: clamp(3.5rem, 15vw, 5rem);
+        font-weight: 300;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        font-variant-numeric: tabular-nums;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      }
 
-    function startTicking() {
-      clearInterval(state.timerId);
-      state.timerId = setInterval(() => {
-        if (state.mode === 'work') {
-          state.remainingSeconds--;
-          state.focusedWorkSinceBonus++;
+      #pip-task {
+        font-size: 1.15rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.75);
+        margin-top: 10px;
+        text-align: center;
+        padding: 0 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    </style>
+  `;
+      }
 
-          if (state.focusedWorkSinceBonus >= state.intervalBonusEvery) {
-  state.breakBankSeconds += state.intervalBonusAmount;
-  state.focusedWorkSinceBonus = 0;
-  playSound('break');
-  sendNotification("Bonus Time Earned!", "You've worked 30 mins. +5 minutes added to your break bank.");
-}
+      // =========================================================
+      // Display Updates
+      // =========================================================
 
-          if (state.remainingSeconds <= 0) {
-  state.remainingSeconds = 0;
-  updateDisplay();
-  state.mode = 'paused';
-  $('extend-modal').classList.add('show');
-  playSound('warning');
-  sendNotification("Timer Paused", "Time is up! Add emergency time or accept your consequence.");
+        function updateDisplay() {
+          const task = state.tasks[state.activeTaskIndex];
+          const currentTaskText = task ? task.title : "Mission complete";
+          const timeStr = formatTime(state.remainingSeconds);
 
-  return;
-}
-        }
+          const mainTimerEl = $("main-timer");
 
-        if (state.mode === 'break') {
-          state.breakRemainingSeconds--;
-          state.breakBankSeconds = Math.max(0, state.breakBankSeconds - 1);
-          if (state.breakRemainingSeconds <= 0 || state.breakBankSeconds <= 0) {
-            returnToWork();
+          mainTimerEl.textContent = timeStr;
+          mainTimerEl.classList.remove("timer-warning", "timer-danger");
+
+          if (state.mode === "work") {
+            if (state.remainingSeconds <= 60) {
+              mainTimerEl.classList.add("timer-danger");
+            } else if (state.remainingSeconds <= 5 * 60) {
+              mainTimerEl.classList.add("timer-warning");
+            }
           }
+
+          $("break-bank").textContent = formatTime(state.breakBankSeconds);
+          $("break-timer").textContent = formatTime(state.breakRemainingSeconds);
+
+          updateCurrentTaskTitle(currentTaskText);
+          updateMiniTaskList();
+          updateBrowserTitle(timeStr, currentTaskText);
+          updateMiniPlayer(timeStr, currentTaskText);
         }
 
-        updateDisplay();
-      }, 1000);
-    }
+      function updateCurrentTaskTitle(currentTaskText) {
+        const currentTaskEl = $("current-task");
 
-    function completeTask() {
-      if (state.mode !== 'work') return;
-      const task = state.tasks[state.activeTaskIndex];
-      const now = Date.now();
-      const duration = Math.max(1, Math.round((now - state.taskStartedAt) / 1000));
-      const earned = Math.round(duration / state.breakEarnRatio);
+        currentTaskEl.textContent = currentTaskText;
+        currentTaskEl.title = currentTaskText;
+        currentTaskEl.classList.remove(
+          "long-task",
+          "very-long-task",
+          "insane-long-task",
+        );
 
-      task.status = 'done';
-      task.completedAt = now;
-      task.workDurationSeconds = duration;
-      task.breakEarnedSeconds = earned;
-      state.breakBankSeconds += earned;
-      playSound('done');
-
-      const nextIndex = state.tasks.findIndex(task => task.status !== 'done');
-      if (nextIndex === -1) {
-        succeedMission();
-        return;
+        if (currentTaskText.length > 90) {
+          currentTaskEl.classList.add("insane-long-task");
+        } else if (currentTaskText.length > 60) {
+          currentTaskEl.classList.add("very-long-task");
+        } else if (currentTaskText.length > 36) {
+          currentTaskEl.classList.add("long-task");
+        }
       }
 
-      state.activeTaskIndex = nextIndex;
-      state.tasks[nextIndex].status = 'active';
-      state.taskStartedAt = Date.now();
-      updateDisplay();
-    }
+      function updateMiniTaskList() {
+        const list = $("mini-task-list");
+        if (!list) return;
 
-    function takeBreak() {
-      if (state.mode !== 'work') return;
-      if (state.breakBankSeconds <= 0) {
-        $('empty-break-modal').classList.add('show');
-        playSound('warning');
-        return;
+        list.innerHTML = "";
+
+        state.tasks.forEach((task, index) => {
+          const item = document.createElement("div");
+
+          item.className = "task-pill";
+          if (task.status === "done") item.classList.add("done");
+          if (index === state.activeTaskIndex && task.status !== "done") {
+            item.classList.add("active-task");
+          }
+
+          item.textContent = task.title;
+          list.appendChild(item);
+        });
       }
-      state.mode = 'break';
-      state.breakRemainingSeconds = state.breakBankSeconds;
-      updateDisplay();
-      showPage('break-page');
-      playSound('break');
-    }
 
-    function closeEmptyBreakModal() {
-      $('empty-break-modal').classList.remove('show');
-    }
-
-    function grantMercyBreak() {
-      const minutes = Math.max(1, parseInt($('mercy-break-minutes').value || '3', 10));
-      state.breakBankSeconds += minutes * 60;
-      $('empty-break-modal').classList.remove('show');
-      takeBreak();
-    }
-
-    function returnToWork() {
-      if (state.mode === 'break' || state.mode === 'paused') {
-        state.mode = 'work';
-        state.taskStartedAt = Date.now();
-        updateDisplay();
-        showPage('active-page');
-        playSound('return');
+      function updateBrowserTitle(timeStr, currentTaskText) {
+        document.title =
+          state.mode === "work"
+            ? `[${timeStr}] ${currentTaskText}`
+            : "Get Shit Done";
       }
-    }
 
-    function extendMission() {
-      const add = Math.max(1, parseInt($('extend-minutes').value || '10', 10));
-      state.remainingSeconds += add * 60;
-      $('extend-modal').classList.remove('show');
-      state.mode = 'work';
-      state.taskStartedAt = Date.now();
-      updateDisplay();
-      playSound('extend');
-    }
+      function updateMiniPlayer(timeStr, currentTaskText) {
+        if (pipTimerEl) pipTimerEl.textContent = timeStr;
+        if (pipTaskEl) pipTaskEl.textContent = currentTaskText;
+      }
 
-    function succeedMission() {
-      clearInterval(state.timerId);
-      state.mode = 'success';
-      $('result-title').textContent = 'Mission complete';
-      $('result-label').textContent = 'Your reward';
-      $('result-text').textContent = state.reward;
-      showPage('result-page');
-      playSound('success');
-    }
+      function updateClock() {
+        const now = new Date();
+        $("clock").textContent =
+          `${String(now.getHours()).padStart(2, "0")}:${String(
+            now.getMinutes(),
+          ).padStart(2, "0")}`;
+      }
 
-    function failMission() {
-      clearInterval(state.timerId);
-      $('extend-modal').classList.remove('show');
-      state.mode = 'failed';
-      $('result-title').textContent = 'Mission failed';
-      $('result-label').textContent = 'Your consequence';
-      $('result-text').textContent = state.consequence;
-      showPage('result-page');
-      playSound('fail');
-    }
+      // =========================================================
+      // Utility Functions
+      // =========================================================
 
-    function resetApp() {
-      clearAllData();
-      showPage('setup-page');
-    }
+      function formatTime(seconds) {
+        seconds = Math.max(0, Math.floor(seconds));
 
-    function jumpToStart() {
-      const ok = confirm('Are you sure you want to jump back to the start? This will clear the current mission.');
-      if (!ok) return;
-      clearAllData();
-      showPage('setup-page');
-    }
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
 
-    function clearAllData() {
-      clearInterval(state.timerId);
-      $('extend-modal').classList.remove('show');
-      $('empty-break-modal').classList.remove('show');
+        if (h > 0) {
+          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
+            s,
+          ).padStart(2, "0")}`;
+        }
 
-      state.missionTitle = 'Finish report';
-      state.consequence = '10 push-ups';
-      state.reward = 'make yourself the hero';
-      state.tasks = [];
-      state.activeTaskIndex = 0;
-      state.remainingSeconds = 0;
-      state.breakBankSeconds = 0;
-      state.breakRemainingSeconds = 0;
-      state.mode = 'setup';
-      state.timerId = null;
-      state.taskStartedAt = null;
-      state.focusedWorkSinceBonus = 0;
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      }
 
-      $('hero-name').value = '';
-      $('mission-title').value = 'Finish report';
-      $('mission-hours').value = 1;
-      $('mission-minutes').value = '30';
-      $('consequence').value = '';
-      $('reward').value = '';
-      $('task-list').innerHTML = '';
-      $('extend-minutes').value = 10;
-      $('mercy-break-minutes').value = 3;
-      updateDisplay();
-    }
+      function escapeHtml(text) {
+        return String(text)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
 
-    function updateDisplay() {
-      $('main-timer').textContent = formatTime(state.remainingSeconds);
-      $('break-bank').textContent = formatTime(state.breakBankSeconds);
-      $('break-timer').textContent = formatTime(state.breakRemainingSeconds);
-      const task = state.tasks[state.activeTaskIndex];
-const currentTaskEl = $('current-task');
-const currentTaskText = task ? task.title : 'Mission complete';
+      // =========================================================
+      // Initialization
+      // =========================================================
 
-currentTaskEl.textContent = currentTaskText;
-currentTaskEl.title = currentTaskText;
-
-currentTaskEl.classList.remove('long-task', 'very-long-task', 'insane-long-task');
-
-if (currentTaskText.length > 90) {
-  currentTaskEl.classList.add('insane-long-task');
-} else if (currentTaskText.length > 60) {
-  currentTaskEl.classList.add('very-long-task');
-} else if (currentTaskText.length > 36) {
-  currentTaskEl.classList.add('long-task');
-}
-
-updateMiniTaskList();
-
-const timeStr = formatTime(state.remainingSeconds);
-      document.title = state.mode === 'work' ? `(${timeStr}) ${currentTaskText}` : 'Get Shit Done';
-
-      if (pipTimerEl) pipTimerEl.textContent = timeStr;
-      if (pipTaskEl) pipTaskEl.textContent = currentTaskText;
-
-    }
-
-    function updateMiniTaskList() {
-      const list = $('mini-task-list');
-      if (!list) return;
-      list.innerHTML = '';
-      state.tasks.forEach((task, index) => {
-        const item = document.createElement('div');
-        item.className = 'task-pill';
-        if (task.status === 'done') item.classList.add('done');
-        if (index === state.activeTaskIndex && task.status !== 'done') item.classList.add('active-task');
-        item.textContent = task.title;
-        list.appendChild(item);
-      });
-    }
-
-    function formatTime(seconds) {
-      seconds = Math.max(0, Math.floor(seconds));
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = seconds % 60;
-      if (h > 0) return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function updateClock() {
-      const now = new Date();
-      $('clock').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    }
-
-    updateClock();
-    setInterval(updateClock, 15000);
-  </script>
-</body>
+      updateClock();
+      setInterval(updateClock, 15000);
+    </script>
+  </body>
 </html>
