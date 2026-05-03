@@ -26,12 +26,14 @@ Pick a mission. Start the countdown. Get it done.
 
 ## How to Use
 
-1. Add one or more tasks to your mission list.
-2. Set the countdown length.
-3. Start the mission.
-4. Focus on the current task until the timer ends.
-5. Take a break when needed.
-6. Continue through the task queue.
+1. Set the overall mission you want to complete.
+2. Choose the countdown length for the mission.
+3. Define the stakes: write a consequence if you fail and a reward if you finish.
+4. Break the mission into smaller targets.
+5. Reorder or add targets until the battle plan feels clear.
+6. Start the mission and focus on the current target.
+7. Mark targets as done to earn break time, then spend or save your break bank.
+8. Finish the mission to claim the reward — or face the consequence.
 
 On supported devices, you can also install it as a PWA and use it like a small standalone app.
 
