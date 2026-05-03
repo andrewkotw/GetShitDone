@@ -1,8 +1,9 @@
 # Get Shit Done
+A mission-based focus timer web app inspired by the original **Get Shit Done** app developed by **plafhop** around 2015.
 
-A simple mission-based focus timer web app.
+That app has since been discontinued and unlisted, but it left a strong impression on me. Back when I was a student, it helped me stop overthinking, organize my tasks, and actually get my shit together.
 
-I built this because I wanted a focus timer that feels more direct and motivating — less like a soft productivity app, more like a small command center for finishing the next task.
+This project is my attempt to recreate that feeling as a simple web app: the same direct tone, mission-like flow, and no-nonsense approach to focusing on the next task.
 
 Pick a mission. Start the countdown. Get it done.
 
