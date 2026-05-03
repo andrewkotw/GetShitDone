@@ -61,7 +61,21 @@ I wanted a small tool that helps me focus on the current task instead of managin
 The app is designed to feel like a personal mission board: add tasks, start the timer, take breaks, and keep going.
 
 It is also a learning project, so the code may not be perfect, but it already does what I need.
+---
+## Future Direction
 
+The app is already usable, so future work will focus on making it more reliable, easier to maintain, and better on mobile.
+
+Planned or possible improvements:
+
+- Improve mobile/PWA behavior, especially notifications and sound
+- Explore a Capacitor Android version for stronger background alarms and lock-screen countdown support
+- Clean up the codebase and separate HTML, CSS, and JavaScript more clearly
+- Add simple mission history and completed-session summaries
+- Add data export or backup
+- Polish the Mini Player experience
+- Improve accessibility, keyboard navigation, and mobile layout
+- Keep the app lightweight instead of turning it into a full productivity platform
 ---
 
 ## Project Structure
@@ -73,3 +87,4 @@ get-shit-done/
 ├── service-worker.js
 ├── icons/
 └── README.md
+
