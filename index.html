@@ -805,6 +805,125 @@
         transform: translateY(1px) scale(0.99);
       }
 
+      .mission-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .mission-head-copy {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+.pause-badge {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+
+  opacity: 0.72;
+
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease,
+    color 0.14s ease;
+}
+
+.pause-badge:hover {
+  opacity: 1;
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.pause-badge:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+.pause-badge:focus-visible {
+  outline: 3px solid rgba(217, 176, 106, 0.7);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.pause-badge::before {
+  content: none;
+}
+
+.pause-badge .pause-glyph,
+.pause-badge .play-glyph {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* pause icon */
+.pause-glyph {
+  width: 20px;
+  height: 24px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.pause-glyph span {
+  width: 6px;
+  height: 24px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+/* play icon */
+.play-glyph {
+  width: 30px;
+  height: 30px;
+  opacity: 0;
+
+  /* SVG-like triangle using clip-path, easier to center than border triangle */
+  background: currentColor;
+  clip-path: polygon(28% 16%, 28% 84%, 82% 50%);
+}
+
+/* default: show pause */
+.pause-badge .pause-glyph {
+  opacity: 1;
+}
+
+.pause-badge .play-glyph {
+  opacity: 0;
+}
+
+/* paused: show play */
+.pause-badge.is-paused .pause-glyph {
+  opacity: 0;
+}
+
+.pause-badge.is-paused .play-glyph {
+  opacity: 1;
+}
+
+      .big-timer.timer-paused {
+        color: #fff0c9;
+        text-shadow:
+          0 18px 55px rgba(0, 0, 0, 0.35),
+          0 0 22px rgba(217, 176, 106, 0.32);
+      }
+
+      .focus-title.paused-task {
+        color: #6b6251;
+      }
+
       .focus-title {
         font-size: clamp(30px, 4vw, 54px);
         line-height: 0.98;
@@ -1313,6 +1432,32 @@
           font-size: 18px;
         }
 
+        .mission-head {
+          gap: 12px;
+        }
+
+        .pause-badge {
+          width: 58px;
+          height: 58px;
+        }
+
+        .pause-badge::before {
+          inset: 8px;
+        }
+
+        .pause-glyph {
+          width: 20px;
+          height: 20px;
+          gap: 5px;
+        }
+
+        .play-glyph {
+          border-top-width: 10px;
+          border-bottom-width: 10px;
+          border-left-width: 15px;
+          margin-left: 3px;
+        }
+
         .rules-header {
           grid-template-columns: minmax(0, 1fr) auto;
           grid-template-areas:
@@ -1558,8 +1703,17 @@
           <div class="active-layout">
             <section class="timer-card">
               <div class="slab white" style="padding-top: 34px; padding-bottom: 38px">
-                <div class="kicker">Your mission</div>
-                <h1 id="active-mission-title" class="mission-title">Finish report</h1>
+                <div class="mission-head">
+                  <div class="mission-head-copy">
+                    <div class="kicker">Your mission</div>
+                    <h1 id="active-mission-title" class="mission-title">Finish report</h1>
+                  </div>
+
+                  <button id="pause-toggle-btn" class="pause-badge" type="button" onclick="togglePauseMission()" title="Pause mission" aria-label="Pause mission">
+                    <span class="pause-glyph" aria-hidden="true"><span></span><span></span></span>
+                    <span class="play-glyph" aria-hidden="true"></span>
+                  </button>
+                </div>
               </div>
               <div class="timer-hero">
                 <div id="main-timer" class="big-timer">00:00</div>
@@ -1689,6 +1843,7 @@
         timerId: null,
         taskStartedAt: null,
         focusedWorkSinceBonus: 0,
+        earningPeriodSeconds: 0,
         breakEarnRatio: 6,
         intervalBonusEvery: 30 * 60,
         intervalBonusAmount: 5 * 60,
@@ -1702,11 +1857,88 @@
 
       const $ = (id) => document.getElementById(id);
 
+      const SETTINGS_KEY = "get-shit-done-settings-v1";
+
       let draggedRow = null;
       let pipTimerEl = null;
       let pipTaskEl = null;
       let pipWindowRef = null;
       let pipOpenedAt = 0;
+
+      // =========================================================
+      // Local Settings
+      // =========================================================
+
+      function saveSettings() {
+        const settings = {
+          breakEarnRatio: state.breakEarnRatio,
+          intervalBonusEvery: state.intervalBonusEvery,
+          intervalBonusAmount: state.intervalBonusAmount,
+          soundEnabled: state.soundEnabled,
+          heroName: $("hero-name")?.value || "human",
+          missionHours: $("mission-hours")?.value || "1",
+          missionMinutes: $("mission-minutes")?.value || "30",
+        };
+
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      }
+
+      function loadSettings() {
+        const saved = localStorage.getItem(SETTINGS_KEY);
+        if (!saved) return;
+
+        try {
+          const settings = JSON.parse(saved);
+
+          state.breakEarnRatio = Number(settings.breakEarnRatio) || 6;
+          state.intervalBonusEvery = Number(settings.intervalBonusEvery) || 30 * 60;
+          state.intervalBonusAmount = Number(settings.intervalBonusAmount) || 5 * 60;
+          state.soundEnabled = settings.soundEnabled !== false;
+
+          if ($("hero-name")) {
+            $("hero-name").value = settings.heroName || "human";
+          }
+
+          if ($("mission-hours")) {
+            $("mission-hours").value = settings.missionHours || "1";
+          }
+
+          if ($("mission-minutes")) {
+            $("mission-minutes").value = String(settings.missionMinutes || "30").padStart(2, "0");
+          }
+        } catch (error) {
+          console.warn("Could not load saved settings:", error);
+        }
+      }
+
+      function setupSettingsAutoSave() {
+        ["hero-name", "mission-hours", "mission-minutes"].forEach((id) => {
+          const input = $(id);
+          if (!input) return;
+
+          input.addEventListener("change", saveSettings);
+          input.addEventListener("blur", saveSettings);
+        });
+      }
+
+      function applySettingsToUI() {
+        if ($("sound-toggle")) {
+          $("sound-toggle").textContent = state.soundEnabled ? "Sound ON" : "Sound OFF";
+          $("sound-toggle").classList.toggle("off", !state.soundEnabled);
+        }
+
+        if ($("break-ratio-slider")) {
+          $("break-ratio-slider").value = state.breakEarnRatio;
+        }
+
+        if ($("bonus-interval-slider")) {
+          $("bonus-interval-slider").value = Math.round(state.intervalBonusEvery / 60);
+        }
+
+        if (typeof updateBreakRulesUI === "function") {
+          updateBreakRulesUI();
+        }
+      }
 
       // =========================================================
       // Audio and Notifications
@@ -1802,6 +2034,8 @@
         if (state.soundEnabled) {
           playSound("done");
         }
+
+        saveSettings();
       }
 
       function requestNotificationPermission() {
@@ -1981,6 +2215,7 @@
         state.breakBankSeconds = 0;
         state.breakRemainingSeconds = 0;
         state.focusedWorkSinceBonus = 0;
+        state.earningPeriodSeconds = 0;
         state.mode = "work";
         state.taskStartedAt = Date.now();
         state.tasks[0].status = "active";
@@ -2016,9 +2251,7 @@
 
         const task = state.tasks[state.activeTaskIndex];
         const now = Date.now();
-
-        const duration = Math.max(1, Math.round((now - state.taskStartedAt) / 1000));
-
+        const duration = Math.max(1, state.earningPeriodSeconds);
         const earned = Math.round(duration / state.breakEarnRatio);
 
         task.status = "done";
@@ -2027,6 +2260,7 @@
         task.breakEarnedSeconds = earned;
 
         state.breakBankSeconds += earned;
+        state.earningPeriodSeconds = 0;
 
         if ("totalBreakEarnedSeconds" in state) {
           state.totalBreakEarnedSeconds += earned;
@@ -2043,9 +2277,6 @@
 
         state.activeTaskIndex = nextIndex;
         state.tasks[nextIndex].status = "active";
-
-        // Reset only after a task is completed.
-        // This starts a new earning period for the next completed target.
         state.taskStartedAt = Date.now();
 
         updateDisplay();
@@ -2079,6 +2310,31 @@
         updateDisplay();
       }
 
+      function pauseMission() {
+        if (state.mode !== "work") return;
+
+        state.mode = "paused-work";
+        updateDisplay();
+      }
+
+      function resumeMission() {
+        if (state.mode !== "paused-work") return;
+
+        state.mode = "work";
+        updateDisplay();
+      }
+
+      function togglePauseMission() {
+        if (state.mode === "work") {
+          pauseMission();
+          return;
+        }
+
+        if (state.mode === "paused-work") {
+          resumeMission();
+        }
+      }
+
       function takeBreak() {
         if (state.mode !== "work") return;
 
@@ -2100,7 +2356,6 @@
         if (state.mode !== "break" && state.mode !== "paused") return;
 
         state.mode = "work";
-        state.taskStartedAt = Date.now();
 
         updateDisplay();
         showPage("active-page");
@@ -2113,7 +2368,6 @@
         state.remainingSeconds += add * 60;
         $("extend-modal").classList.remove("show");
         state.mode = "work";
-        state.taskStartedAt = Date.now();
 
         updateDisplay();
         playSound("extend");
@@ -2175,14 +2429,22 @@
         state.timerId = null;
         state.taskStartedAt = null;
         state.focusedWorkSinceBonus = 0;
+        state.earningPeriodSeconds = 0;
         state.missionDurationSeconds = 0;
         state.missionStartedAt = null;
         state.missionEndedAt = null;
 
-        $("hero-name").value = "human";
         $("mission-title").value = "Finish report";
-        $("mission-hours").value = 1;
-        $("mission-minutes").value = "30";
+        const saved = localStorage.getItem(SETTINGS_KEY);
+
+        if (saved) {
+          loadSettings();
+          applySettingsToUI();
+        } else {
+          $("hero-name").value = "human";
+          $("mission-hours").value = 1;
+          $("mission-minutes").value = "30";
+        }
         $("consequence").value = "";
         $("reward").value = "";
         $("task-list").innerHTML = "";
@@ -2235,6 +2497,7 @@
       function tickWorkTimer() {
         state.remainingSeconds--;
         state.focusedWorkSinceBonus++;
+        state.earningPeriodSeconds++;
 
         if (state.focusedWorkSinceBonus >= state.intervalBonusEvery) {
           earnIntervalBonus();
@@ -2295,6 +2558,7 @@
         state.intervalBonusAmount = 5 * 60;
 
         updateBreakRulesUI();
+        saveSettings();
       }
 
       function updateBreakRulesUI() {
@@ -2447,7 +2711,11 @@
         const mainTimerEl = $("main-timer");
 
         mainTimerEl.textContent = timeStr;
-        mainTimerEl.classList.remove("timer-warning", "timer-danger");
+        mainTimerEl.classList.remove("timer-warning", "timer-danger", "timer-paused");
+
+        if (state.mode === "paused-work") {
+          mainTimerEl.classList.add("timer-paused");
+        }
 
         if (state.mode === "work") {
           if (state.remainingSeconds <= 60) {
@@ -2462,6 +2730,7 @@
 
         updateCurrentTaskTitle(currentTaskText);
         updateMiniTaskList();
+        updateActiveControls();
         updateBrowserTitle(timeStr, currentTaskText);
         updateMiniPlayer(timeStr, currentTaskText);
       }
@@ -2471,7 +2740,11 @@
 
         currentTaskEl.textContent = currentTaskText;
         currentTaskEl.title = currentTaskText;
-        currentTaskEl.classList.remove("long-task", "very-long-task", "insane-long-task");
+        currentTaskEl.classList.remove("long-task", "very-long-task", "insane-long-task", "paused-task");
+
+        if (state.mode === "paused-work") {
+          currentTaskEl.classList.add("paused-task");
+        }
 
         if (currentTaskText.length > 90) {
           currentTaskEl.classList.add("insane-long-task");
@@ -2502,13 +2775,33 @@
         });
       }
 
+      function updateActiveControls() {
+        const pauseBtn = $("pause-toggle-btn");
+        if (!pauseBtn) return;
+
+        const isPaused = state.mode === "paused-work";
+        pauseBtn.classList.toggle("is-paused", isPaused);
+        pauseBtn.title = isPaused ? "Resume mission" : "Pause mission";
+        pauseBtn.setAttribute("aria-label", isPaused ? "Resume mission" : "Pause mission");
+      }
+
       function updateBrowserTitle(timeStr, currentTaskText) {
-        document.title = state.mode === "work" ? `[${timeStr}] ${currentTaskText}` : "Get Shit Done";
+        if (state.mode === "work") {
+          document.title = `[${timeStr}] ${currentTaskText}`;
+          return;
+        }
+
+        if (state.mode === "paused-work") {
+          document.title = `[PAUSED ${timeStr}] ${currentTaskText}`;
+          return;
+        }
+
+        document.title = "Get Shit Done";
       }
 
       function updateMiniPlayer(timeStr, currentTaskText) {
-        if (pipTimerEl) pipTimerEl.textContent = timeStr;
-        if (pipTaskEl) pipTaskEl.textContent = currentTaskText;
+        if (pipTimerEl) pipTimerEl.textContent = state.mode === "paused-work" ? `PAUSED ${timeStr}` : timeStr;
+        if (pipTaskEl) pipTaskEl.textContent = state.mode === "paused-work" ? `Paused · ${currentTaskText}` : currentTaskText;
       }
 
       function updateClock() {
@@ -2582,6 +2875,70 @@
       }
 
       // =========================================================
+      // Keyboard Shortcuts
+      // =========================================================
+
+      function setupKeyboardShortcuts() {
+        document.addEventListener("keydown", handleKeyboardShortcut);
+      }
+
+      function handleKeyboardShortcut(event) {
+        if (event.repeat) return;
+        if (isTypingTarget(event.target)) return;
+
+        const key = event.key.toLowerCase();
+
+        if (key === "escape") {
+          closeKeyboardDismissibleModals();
+          return;
+        }
+
+        if (state.mode !== "work" && state.mode !== "paused-work") return;
+
+        if (event.code === "Space") {
+          event.preventDefault();
+          togglePauseMission();
+          return;
+        }
+
+        if (key === "enter") {
+          event.preventDefault();
+          completeTask();
+          return;
+        }
+
+        if (key === "s") {
+          event.preventDefault();
+          skipTask();
+          return;
+        }
+
+        if (key === "b") {
+          event.preventDefault();
+          takeBreak();
+        }
+      }
+
+      function isTypingTarget(target) {
+        if (!target) return false;
+
+        const tagName = target.tagName?.toLowerCase();
+        return tagName === "input" || tagName === "textarea" || tagName === "select" || tagName === "button" || tagName === "a" || target.isContentEditable;
+      }
+
+      function closeKeyboardDismissibleModals() {
+        closeEmptyBreakModal();
+
+        const panel = $("rules-panel");
+        const toggle = $("rules-toggle");
+        if (panel?.classList.contains("show")) {
+          panel.classList.remove("show");
+          toggle?.setAttribute("aria-expanded", "false");
+          if (toggle) toggle.textContent = "Customize ▾";
+        }
+      }
+
+      // =========================================================
       // Utility Functions
       // =========================================================
 
@@ -2644,9 +3001,13 @@
         }
       });
 
+      loadSettings();
+      applySettingsToUI();
+      setupSettingsAutoSave();
+      setupKeyboardShortcuts();
+
       updateClock();
-      updateBreakRulesUI();
-      setInterval(updateClock, 15000);
+      setInterval(updateClock, 1000);
     </script>
   </body>
 </html>
