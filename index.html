@@ -32,22 +32,8 @@
         color: var(--ink);
         font-family: Inter, Arial, Helvetica, sans-serif;
         background:
-          radial-gradient(
-            circle at 12% 12%,
-            rgba(255, 144, 55, 0.22),
-            transparent 28%
-          ),
-          radial-gradient(
-            circle at 88% 18%,
-            rgba(217, 176, 106, 0.16),
-            transparent 30%
-          ),
-          radial-gradient(
-            circle at 70% 90%,
-            rgba(55, 63, 128, 0.35),
-            transparent 34%
-          ),
-          linear-gradient(135deg, #050509, #151522 52%, #070815);
+          radial-gradient(circle at 12% 12%, rgba(255, 144, 55, 0.22), transparent 28%), radial-gradient(circle at 88% 18%, rgba(217, 176, 106, 0.16), transparent 30%),
+          radial-gradient(circle at 70% 90%, rgba(55, 63, 128, 0.35), transparent 34%), linear-gradient(135deg, #050509, #151522 52%, #070815);
         overflow-x: hidden;
       }
       body::before {
@@ -56,9 +42,7 @@
         inset: 0;
         pointer-events: none;
         opacity: 0.55;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
         background-size: 36px 36px;
         mask-image: linear-gradient(to bottom, black, transparent 88%);
       }
@@ -183,16 +167,7 @@
         min-height: 560px;
         overflow: hidden;
         background:
-          radial-gradient(
-            circle at 18% 12%,
-            rgba(155, 92, 33, 0.55),
-            transparent 28%
-          ),
-          radial-gradient(
-            circle at 85% 80%,
-            rgba(25, 74, 135, 0.44),
-            transparent 34%
-          ),
+          radial-gradient(circle at 18% 12%, rgba(155, 92, 33, 0.55), transparent 28%), radial-gradient(circle at 85% 80%, rgba(25, 74, 135, 0.44), transparent 34%),
           linear-gradient(155deg, #3b2713 0%, #161621 45%, #080914 100%);
         box-shadow:
           0 28px 90px rgba(0, 0, 0, 0.42),
@@ -205,26 +180,11 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
-        background: linear-gradient(
-          110deg,
-          transparent 0 42%,
-          rgba(255, 255, 255, 0.045) 42% 52%,
-          transparent 52%
-        );
+        background: linear-gradient(110deg, transparent 0 42%, rgba(255, 255, 255, 0.045) 42% 52%, transparent 52%);
       }
       .side-card {
         min-height: 560px;
-        background:
-          radial-gradient(
-            circle at 70% 18%,
-            rgba(217, 176, 106, 0.22),
-            transparent 28%
-          ),
-          linear-gradient(
-            145deg,
-            rgba(255, 255, 255, 0.09),
-            rgba(255, 255, 255, 0.03)
-          );
+        background: radial-gradient(circle at 70% 18%, rgba(217, 176, 106, 0.22), transparent 28%), linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: white;
         padding: 28px;
@@ -495,11 +455,7 @@
       }
       .btn-primary {
         color: var(--ink);
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.92),
-          rgba(247, 246, 242, 0.88)
-        );
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(247, 246, 242, 0.88));
         border: 1px solid rgba(255, 255, 255, 0.55);
         box-shadow:
           0 16px 42px rgba(0, 0, 0, 0.22),
@@ -691,16 +647,7 @@
         border-radius: 28px;
         position: relative;
         background:
-          radial-gradient(
-            circle at 16% 12%,
-            rgba(155, 92, 33, 0.42),
-            transparent 26%
-          ),
-          radial-gradient(
-            circle at 86% 76%,
-            rgba(25, 74, 135, 0.52),
-            transparent 32%
-          ),
+          radial-gradient(circle at 16% 12%, rgba(155, 92, 33, 0.42), transparent 26%), radial-gradient(circle at 86% 76%, rgba(25, 74, 135, 0.52), transparent 32%),
           linear-gradient(155deg, #3b2713 0%, #161621 45%, #080914 100%);
         box-shadow:
           0 28px 90px rgba(0, 0, 0, 0.42),
@@ -715,26 +662,28 @@
       }
       .big-timer {
         font-size: clamp(76px, 13vw, 168px);
-        line-height: .9;
+        line-height: 0.9;
         font-weight: 250;
-        letter-spacing: -.06em;
-        text-shadow: 0 18px 55px rgba(0,0,0,.35);
+        letter-spacing: -0.06em;
+        text-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
         font-variant-numeric: tabular-nums;
-        transition: color .2s ease, text-shadow .2s ease;
+        transition:
+          color 0.2s ease,
+          text-shadow 0.2s ease;
       }
 
       .big-timer.timer-warning {
         color: #ffd166;
         text-shadow:
-          0 18px 55px rgba(0,0,0,.35),
-          0 0 24px rgba(255, 209, 102, .35);
+          0 18px 55px rgba(0, 0, 0, 0.35),
+          0 0 24px rgba(255, 209, 102, 0.35);
       }
 
       .big-timer.timer-danger {
         color: #ff5b5b;
         text-shadow:
-          0 18px 55px rgba(0,0,0,.35),
-          0 0 28px rgba(255, 91, 91, .42);
+          0 18px 55px rgba(0, 0, 0, 0.35),
+          0 0 28px rgba(255, 91, 91, 0.42);
       }
       .focus-grid {
         display: grid;
@@ -742,93 +691,89 @@
         gap: 22px;
         align-items: center;
       }
-.focus-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-end;
-  width: max-content;
-  max-width: 320px;
-}
+      .focus-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-end;
+        width: max-content;
+        max-width: 320px;
+      }
 
-.focus-actions .btn-giant {
-  width: 300px;
-  min-height: 70px;
-  padding-inline: 24px;
-}
+      .focus-actions .btn-giant {
+        width: 300px;
+        min-height: 70px;
+        padding-inline: 24px;
+      }
 
-.btn-skip {
-  width: 240px;
-  min-height: 48px;
-  padding: 12px 20px;
-  border-radius: 18px;
+      .btn-skip {
+        width: 240px;
+        min-height: 48px;
+        padding: 12px 20px;
+        border-radius: 18px;
 
-  color: #3f3f46;
-  background: rgba(16, 16, 20, 0.06);
-  border: 1px solid rgba(16, 16, 20, 0.12);
+        color: #3f3f46;
+        background: rgba(16, 16, 20, 0.06);
+        border: 1px solid rgba(16, 16, 20, 0.12);
 
-  font-size: 14px;
-  font-weight: 950;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+        font-size: 14px;
+        font-weight: 950;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
 
-  box-shadow:
-    inset 0 -2px 0 rgba(0, 0, 0, 0.05),
-    0 10px 28px rgba(0, 0, 0, 0.08);
-}
+        box-shadow:
+          inset 0 -2px 0 rgba(0, 0, 0, 0.05),
+          0 10px 28px rgba(0, 0, 0, 0.08);
+      }
 
-.btn-skip:hover {
-  color: var(--ink);
-  background: rgba(217, 176, 106, 0.18);
-  border-color: rgba(217, 176, 106, 0.42);
-  box-shadow:
-    inset 0 -2px 0 rgba(0, 0, 0, 0.06),
-    0 14px 32px rgba(217, 176, 106, 0.18);
-}
+      .btn-skip:hover {
+        color: var(--ink);
+        background: rgba(217, 176, 106, 0.18);
+        border-color: rgba(217, 176, 106, 0.42);
+        box-shadow:
+          inset 0 -2px 0 rgba(0, 0, 0, 0.06),
+          0 14px 32px rgba(217, 176, 106, 0.18);
+      }
 
-.btn-skip:active {
-  transform: translateY(1px) scale(0.99);
-}
+      .btn-skip:active {
+        transform: translateY(1px) scale(0.99);
+      }
 
-.focus-title {
-  font-size: clamp(30px, 4vw, 54px);
-  line-height: .98;
-  font-weight: 850;
-  letter-spacing: -.045em;
-  color: #404047;
+      .focus-title {
+        font-size: clamp(30px, 4vw, 54px);
+        line-height: 0.98;
+        font-weight: 850;
+        letter-spacing: -0.045em;
+        color: #404047;
 
-  max-height: none;
-  overflow: visible;
-  display: block;
-  overflow-wrap: anywhere;
-}
-.focus-title.long-task {
-  font-size: clamp(28px, 3.4vw, 42px);
-  line-height: 1.05;
-  letter-spacing: -.035em;
-}
+        max-height: none;
+        overflow: visible;
+        display: block;
+        overflow-wrap: anywhere;
+      }
+      .focus-title.long-task {
+        font-size: clamp(28px, 3.4vw, 42px);
+        line-height: 1.05;
+        letter-spacing: -0.035em;
+      }
 
-.focus-title.very-long-task {
-  font-size: clamp(24px, 2.8vw, 34px);
-  line-height: 1.12;
-  letter-spacing: -.025em;
-}
+      .focus-title.very-long-task {
+        font-size: clamp(24px, 2.8vw, 34px);
+        line-height: 1.12;
+        letter-spacing: -0.025em;
+      }
 
-.focus-title.insane-long-task {
-  font-size: clamp(20px, 2.3vw, 28px);
-  line-height: 1.16;
-  letter-spacing: -.015em;
-}
+      .focus-title.insane-long-task {
+        font-size: clamp(20px, 2.3vw, 28px);
+        line-height: 1.16;
+        letter-spacing: -0.015em;
+      }
       .mission-side-panel {
         border-radius: 28px;
         padding: 26px;
         color: white;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        background: linear-gradient(
-          145deg,
-          rgba(255, 255, 255, 0.09),
-          rgba(255, 255, 255, 0.035)
-        );
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035));
         box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
         display: flex;
         flex-direction: column;
@@ -894,13 +839,7 @@
         border-radius: 28px;
         overflow: hidden;
         position: relative;
-        background:
-          radial-gradient(
-            circle at 26% 18%,
-            rgba(217, 176, 106, 0.22),
-            transparent 28%
-          ),
-          linear-gradient(155deg, #312111, #11131f 52%, #070815);
+        background: radial-gradient(circle at 26% 18%, rgba(217, 176, 106, 0.22), transparent 28%), linear-gradient(155deg, #312111, #11131f 52%, #070815);
         box-shadow:
           0 28px 90px rgba(0, 0, 0, 0.42),
           inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -953,13 +892,7 @@
         width: min(680px, 100%);
         border-radius: 28px;
         overflow: hidden;
-        background:
-          radial-gradient(
-            circle at top right,
-            rgba(217, 176, 106, 0.2),
-            transparent 35%
-          ),
-          #11131f;
+        background: radial-gradient(circle at top right, rgba(217, 176, 106, 0.2), transparent 35%), #11131f;
         box-shadow:
           0 30px 100px rgba(0, 0, 0, 0.5),
           inset 0 0 0 1px rgba(255, 255, 255, 0.1);
@@ -988,13 +921,7 @@
       }
       .btn-quiet-dark {
         color: rgba(255, 255, 255, 0.9);
-        background:
-          radial-gradient(
-            circle at 20% 0%,
-            rgba(217, 176, 106, 0.12),
-            transparent 38%
-          ),
-          linear-gradient(135deg, #222331, #070815);
+        background: radial-gradient(circle at 20% 0%, rgba(217, 176, 106, 0.12), transparent 38%), linear-gradient(135deg, #222331, #070815);
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow:
           0 14px 34px rgba(0, 0, 0, 0.22),
@@ -1002,13 +929,7 @@
       }
       .btn-quiet-dark:hover {
         color: white;
-        background:
-          radial-gradient(
-            circle at 20% 0%,
-            rgba(217, 176, 106, 0.2),
-            transparent 38%
-          ),
-          linear-gradient(135deg, #2c2e3e, #0b0d16);
+        background: radial-gradient(circle at 20% 0%, rgba(217, 176, 106, 0.2), transparent 38%), linear-gradient(135deg, #2c2e3e, #0b0d16);
       }
       .hidden {
         display: none !important;
@@ -1087,20 +1008,20 @@
           letter-spacing: 0.07em;
           margin-top: 8px;
         }
-.focus-grid {
-  grid-template-columns: 1fr;
-}
+        .focus-grid {
+          grid-template-columns: 1fr;
+        }
 
-.focus-actions {
-  width: 100%;
-  max-width: none;
-  align-items: stretch;
-}
+        .focus-actions {
+          width: 100%;
+          max-width: none;
+          align-items: stretch;
+        }
 
-.focus-actions .btn-giant,
-.btn-skip {
-  width: 100%;
-}
+        .focus-actions .btn-giant,
+        .btn-skip {
+          width: 100%;
+        }
         .btn-giant {
           width: 100%;
         }
@@ -1148,24 +1069,27 @@
         padding: 0;
         font: inherit;
         font-weight: 950;
-        letter-spacing: .05em;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
         cursor: pointer;
-        transition: color .14s ease, transform .14s ease, text-shadow .14s ease;
+        transition:
+          color 0.14s ease,
+          transform 0.14s ease,
+          text-shadow 0.14s ease;
       }
 
       .brand-text:hover {
         color: var(--accent);
         transform: translateY(-1px);
-        text-shadow: 0 8px 22px rgba(217, 176, 106, .28);
+        text-shadow: 0 8px 22px rgba(217, 176, 106, 0.28);
       }
 
       .brand-text:active {
-        transform: translateY(1px) scale(.98);
+        transform: translateY(1px) scale(0.98);
       }
 
       .brand-text:focus-visible {
-        outline: 3px solid rgba(217,176,106,.75);
+        outline: 3px solid rgba(217, 176, 106, 0.75);
         outline-offset: 4px;
         border-radius: 6px;
       }
@@ -1176,35 +1100,14 @@
       <header class="topbar">
         <div class="topbar-inner">
           <div class="brand">
-            <button
-              class="brand-mark"
-              type="button"
-              onclick="jumpToStart()"
-              title="Jump to start"
-            >
-              !
-            </button>
+            <button class="brand-mark" type="button" onclick="jumpToStart()" title="Jump to start">!</button>
 
-            <button
-              class="brand-text"
-              type="button"
-              onclick="jumpToStart()"
-              title="Jump to start"
-            >
-              Get Shit Done
-            </button>
+            <button class="brand-text" type="button" onclick="jumpToStart()" title="Jump to start">Get Shit Done</button>
           </div>
           <div class="top-meta">
             <span class="dot"></span>
             <span id="clock">22:27</span>
-            <button
-              id="sound-toggle"
-              class="sound-toggle"
-              type="button"
-              onclick="toggleSound()"
-            >
-              Sound ON
-            </button>
+            <button id="sound-toggle" class="sound-toggle" type="button" onclick="toggleSound()">Sound ON</button>
             <span>Based on Get Shit Done by plafhop</span>
           </div>
         </div>
@@ -1213,10 +1116,7 @@
         <div id="setup-page" class="page active">
           <div class="hero-layout">
             <section class="mission-card setup-stack landing-card">
-              <div
-                class="slab dark tilt-a"
-                style="padding-top: 70px; padding-bottom: 66px"
-              >
+              <div class="slab dark tilt-a" style="padding-top: 70px; padding-bottom: 66px">
                 <div class="one-line-select">
                   <span>One</span>
                   <span class="select-wrap">
@@ -1228,103 +1128,44 @@
                   </span>
                 </div>
               </div>
-              <div
-                class="slab white tilt-b"
-                style="padding-top: 44px; padding-bottom: 46px"
-              >
+              <div class="slab white tilt-b" style="padding-top: 44px; padding-bottom: 46px">
                 <div class="kicker">One mission</div>
                 <input id="mission-title" class="field" value="Finish report" />
               </div>
-              <div
-                class="slab dark tilt-c"
-                style="padding-top: 44px; padding-bottom: 50px"
-              >
+              <div class="slab dark tilt-c" style="padding-top: 44px; padding-bottom: 50px">
                 <div class="kicker">Countdown length</div>
                 <div class="time-grid">
                   <div class="time-box">
                     <div class="time-input-wrap">
-                      <button
-                        class="stepper-btn"
-                        type="button"
-                        onclick="stepNumber('mission-hours', -1)"
-                      >
-                        −
-                      </button>
-                      <input
-                        id="mission-hours"
-                        class="field"
-                        type="number"
-                        value="1"
-                        min="0"
-                      />
-                      <button
-                        class="stepper-btn"
-                        type="button"
-                        onclick="stepNumber('mission-hours', 1)"
-                      >
-                        +
-                      </button>
+                      <button class="stepper-btn" type="button" onclick="stepNumber('mission-hours', -1)">−</button>
+                      <input id="mission-hours" class="field" type="number" value="1" min="0" />
+                      <button class="stepper-btn" type="button" onclick="stepNumber('mission-hours', 1)">+</button>
                     </div>
                     <div class="unit">hour(s)</div>
                   </div>
                   <div class="time-box">
                     <div class="time-input-wrap">
-                      <button
-                        class="stepper-btn"
-                        type="button"
-                        onclick="stepNumber('mission-minutes', -5)"
-                      >
-                        −
-                      </button>
-                      <input
-                        id="mission-minutes"
-                        class="field"
-                        type="text"
-                        inputmode="numeric"
-                        value="30"
-                        min="0"
-                        max="59"
-                        onblur="formatMinuteInput(this)"
-                      />
-                      <button
-                        class="stepper-btn"
-                        type="button"
-                        onclick="stepNumber('mission-minutes', 5)"
-                      >
-                        +
-                      </button>
+                      <button class="stepper-btn" type="button" onclick="stepNumber('mission-minutes', -5)">−</button>
+                      <input id="mission-minutes" class="field" type="text" inputmode="numeric" value="30" min="0" max="59" onblur="formatMinuteInput(this)" />
+                      <button class="stepper-btn" type="button" onclick="stepNumber('mission-minutes', 5)">+</button>
                     </div>
                     <div class="unit">minute(s)</div>
                   </div>
                 </div>
               </div>
-              <div
-                class="slab white"
-                style="padding-top: 24px; padding-bottom: 24px"
-              >
-                <button
-                  class="btn text-cta text-cta-dark arrow"
-                  onclick="goToStakes()"
-                >
-                  HOOO-AAAH!
-                </button>
+              <div class="slab white" style="padding-top: 24px; padding-bottom: 24px">
+                <button class="btn text-cta text-cta-dark arrow" onclick="goToStakes()">HOOO-AAAH!</button>
               </div>
             </section>
             <aside class="side-card landing-side">
               <div>
                 <div class="side-eyebrow">Based on the lost app</div>
                 <h1 class="side-big">Get Shit Done</h1>
-                <p class="side-text">
-                  One mission. One timer. Earn your break, bank it, and spend it
-                  when you actually need it.
-                </p>
+                <p class="side-text">One mission. One timer. Earn your break, bank it, and spend it when you actually need it.</p>
               </div>
               <div class="stat-card">
                 <div class="label">Default rules</div>
-                <p class="side-text" style="margin: 0">
-                  1 minute break per 6 minutes of work. +5 minutes every 30
-                  focused minutes.
-                </p>
+                <p class="side-text" style="margin: 0">1 minute break per 6 minutes of work. +5 minutes every 30 focused minutes.</p>
               </div>
             </aside>
           </div>
@@ -1332,174 +1173,83 @@
         <div id="stakes-page" class="page">
           <div class="hero-layout">
             <section class="mission-card setup-stack">
-              <div
-                class="slab dark tilt-a"
-                style="padding-top: 58px; padding-bottom: 56px"
-              >
-                <p class="quote">
-                  Doing this is essential, because the consequences will be
-                  cruel:
-                </p>
+              <div class="slab dark tilt-a" style="padding-top: 58px; padding-bottom: 56px">
+                <p class="quote">Doing this is essential, because the consequences will be cruel:</p>
               </div>
-              <div
-                class="slab white tilt-b"
-                style="padding-top: 42px; padding-bottom: 44px"
-              >
-                <input
-                  id="consequence"
-                  class="field"
-                  value=""
-                  placeholder="10 push-ups"
-                />
+              <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 44px">
+                <input id="consequence" class="field" value="" placeholder="10 push-ups" />
               </div>
-              <div
-                class="slab dark tilt-c"
-                style="padding-top: 56px; padding-bottom: 58px"
-              >
+              <div class="slab dark tilt-c" style="padding-top: 56px; padding-bottom: 58px">
                 <p class="quote">However, the reward will be fantastic:</p>
               </div>
-              <div
-                class="slab white tilt-b"
-                style="padding-top: 42px; padding-bottom: 44px"
-              >
-                <input
-                  id="reward"
-                  class="field"
-                  value=""
-                  placeholder="make yourself the hero"
-                />
+              <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 44px">
+                <input id="reward" class="field" value="" placeholder="make yourself the hero" />
               </div>
-              <div
-                class="slab dark"
-                style="padding-top: 24px; padding-bottom: 24px"
-              >
-                <button
-                  class="btn text-cta text-cta-light arrow"
-                  onclick="goToTasks()"
-                >
-                  KABOOOM!
-                </button>
+              <div class="slab dark" style="padding-top: 24px; padding-bottom: 24px">
+                <button class="btn text-cta text-cta-light arrow" onclick="goToTasks()">KABOOOM!</button>
               </div>
             </section>
             <aside class="side-card">
               <div>
                 <div class="side-eyebrow">Self-contract</div>
                 <h2 class="side-big">Make the stakes visible.</h2>
-                <p class="side-text">
-                  The consequence is not for shame. It gives the mission weight.
-                  The reward gives the finish line a shape.
+                <p class="side-text">The consequence is not for shame. It gives the mission weight. The reward gives the finish line a shape.
                 </p>
               </div>
-              <button
-                class="btn btn-dark arrow-left"
-                onclick="showPage('setup-page')"
-              >
-                Back to mission setup
-              </button>
+              <button class="btn btn-dark arrow-left" onclick="showPage('setup-page')">Back to mission setup</button>
             </aside>
           </div>
         </div>
         <div id="tasks-page" class="page">
           <div class="hero-layout">
             <section class="mission-card setup-stack">
-              <div
-                class="slab dark tilt-a"
-                style="padding-top: 50px; padding-bottom: 48px"
-              >
+              <div class="slab dark tilt-a" style="padding-top: 50px; padding-bottom: 48px">
                 <p class="quote">Break the impossible into smaller targets.</p>
               </div>
-              <div
-                class="slab white tilt-b"
-                style="padding-top: 42px; padding-bottom: 46px"
-              >
+              <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 46px">
                 <div class="kicker">Your battle plan</div>
                 <h2 class="mission-title">Targets</h2>
                 <div id="task-list" class="task-list"></div>
-                <button
-                  class="btn btn-paper"
-                  style="margin-top: 12px"
-                  onclick="addTask('')"
-                >
-                  + Add target
-                </button>
+                <button class="btn btn-paper" style="margin-top: 12px" onclick="addTask('')">+ Add target</button>
               </div>
-              <div
-                class="slab dark tilt-c"
-                style="padding-top: 44px; padding-bottom: 46px"
-              >
+              <div class="slab dark tilt-c" style="padding-top: 44px; padding-bottom: 46px">
                 <div class="kicker">Break economy</div>
-                <p class="quote" style="font-size: clamp(24px, 2.7vw, 36px)">
-                  Finish targets. Earn break time. Save it until you actually
-                  want it.
-                </p>
+                <p class="quote" style="font-size: clamp(24px, 2.7vw, 36px)">Finish targets. Earn break time. Save it until you actually want it.</p>
               </div>
-              <div
-                class="slab white"
-                style="padding-top: 24px; padding-bottom: 24px"
-              >
-                <button
-                  class="btn text-cta text-cta-dark arrow"
-                  onclick="startMission()"
-                >
-                  START MISSION
-                </button>
+              <div class="slab white" style="padding-top: 24px; padding-bottom: 24px">
+                <button class="btn text-cta text-cta-dark arrow" onclick="startMission()">START MISSION</button>
               </div>
             </section>
             <aside class="side-card">
               <div>
                 <div class="side-eyebrow">Suggested targets</div>
                 <h2 class="side-big">Clear. Small. Finishable.</h2>
-                <p class="side-text">
-                  Use action phrases: “draft intro,” “clean diagram,” “send
-                  file.” The timer rewards completed targets, so avoid vague
-                  tasks.
-                </p>
+                <p class="side-text">Use action phrases: “draft intro,” “clean diagram,” “send file.” The timer rewards completed targets, so avoid vague tasks.</p>
               </div>
-              <button
-                class="btn btn-dark arrow-left"
-                onclick="showPage('stakes-page')"
-              >
-                Back to stakes
-              </button>
+              <button class="btn btn-dark arrow-left" onclick="showPage('stakes-page')">Back to stakes</button>
             </aside>
           </div>
         </div>
         <div id="active-page" class="page">
           <div class="active-layout">
             <section class="timer-card">
-              <div
-                class="slab white"
-                style="padding-top: 34px; padding-bottom: 38px"
-              >
+              <div class="slab white" style="padding-top: 34px; padding-bottom: 38px">
                 <div class="kicker">Your mission</div>
-                <h1 id="active-mission-title" class="mission-title">
-                  Finish report
-                </h1>
+                <h1 id="active-mission-title" class="mission-title">Finish report</h1>
               </div>
               <div class="timer-hero">
                 <div id="main-timer" class="big-timer">00:00</div>
               </div>
-              <div
-                class="slab white tilt-a"
-                style="padding-top: 58px; padding-bottom: 70px"
-              >
+              <div class="slab white tilt-a" style="padding-top: 58px; padding-bottom: 70px">
                 <div class="focus-grid">
                   <div>
-                    <div class="kicker" style="color: #363640">
-                      Focus! Do this now
-                    </div>
-                    <div id="current-task" class="focus-title">
-                      Write introduction
-                    </div>
+                    <div class="kicker" style="color: #363640">Focus! Do this now</div>
+                    <div id="current-task" class="focus-title">Write introduction</div>
                   </div>
                   <div class="focus-actions">
-                    <button class="btn btn-primary btn-giant" onclick="completeTask()">
-                      BOOM! DONE!
-                    </button>
+                    <button class="btn btn-primary btn-giant" onclick="completeTask()">BOOM! DONE!</button>
 
-                    <button class="btn btn-skip" onclick="skipTask()">
-                      Skip for now
-                    </button>
+                    <button class="btn btn-skip" onclick="skipTask()">Skip for now</button>
                   </div>
                 </div>
               </div>
@@ -1508,28 +1258,14 @@
               <div class="stat-card">
                 <div class="label">Heroes need rest too</div>
                 <div id="break-bank" class="break-bank">00:00</div>
-                <button
-                  class="btn btn-paper arrow"
-                  style="margin-top: 18px; width: 100%"
-                  onclick="takeBreak()"
-                >
-                  Take a break
-                </button>
+                <button class="btn btn-paper arrow" style="margin-top: 18px; width: 100%" onclick="takeBreak()">Take a break</button>
               </div>
               <div class="stat-card">
                 <div class="label">Targets</div>
                 <div id="mini-task-list" class="task-mini-list"></div>
               </div>
-              <button
-                class="btn secondary"
-                onclick="openMiniTimer()"
-                title="Pop out a mini timer"
-              >
-                MINI PLAYER
-              </button>
-              <button class="give-up-link" onclick="failMission()">
-                I'm weak and give up ›
-              </button>
+              <button class="btn btn-quiet-dark" onclick="openMiniTimer()" title="Pop out a mini timer">MINI PLAYER</button>
+              <button class="give-up-link" onclick="failMission()">I'm weak and give up ›</button>
             </aside>
           </div>
         </div>
@@ -1538,19 +1274,8 @@
             <div>
               <div class="side-eyebrow">Break time</div>
               <h1 class="result-title" id="break-timer">00:00</h1>
-              <p
-                class="side-text"
-                style="max-width: 600px; margin: 26px auto 32px"
-              >
-                You earned this. Stop early and the unused time stays in your
-                bank.
-              </p>
-              <button
-                class="btn btn-primary btn-giant arrow"
-                onclick="returnToWork()"
-              >
-                Back to work
-              </button>
+              <p class="side-text" style="max-width: 600px; margin: 26px auto 32px">You earned this. Stop early and the unused time stays in your bank.</p>
+              <button class="btn btn-primary btn-giant arrow" onclick="returnToWork()">Back to work</button>
             </div>
           </section>
         </div>
@@ -1560,16 +1285,9 @@
               <h1 class="result-title" id="result-title">Mission complete</h1>
               <div class="result-card">
                 <div class="kicker" id="result-label">Your reward</div>
-                <p class="result-text" id="result-text">
-                  make yourself the hero
-                </p>
+                <p class="result-text" id="result-text">make yourself the hero</p>
               </div>
-              <button
-                class="btn btn-primary btn-giant arrow"
-                onclick="resetApp()"
-              >
-                Another mission
-              </button>
+              <button class="btn btn-primary btn-giant arrow" onclick="resetApp()">Another mission</button>
             </div>
           </section>
         </div>
@@ -1577,119 +1295,50 @@
     </main>
     <div id="empty-break-modal" class="modal-backdrop">
       <div class="modal">
-        <div
-          class="slab white tilt-b"
-          style="padding-top: 42px; padding-bottom: 52px"
-        >
-          <p class="quote" style="color: #55555d">
-            Trying to rest with an empty bank? Bold strategy, hero.
-          </p>
+        <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 52px">
+          <p class="quote" style="color: #55555d">Trying to rest with an empty bank? Bold strategy, hero.</p>
         </div>
-        <div
-          class="slab dark tilt-c"
-          style="padding-top: 46px; padding-bottom: 52px"
-        >
+        <div class="slab dark tilt-c" style="padding-top: 46px; padding-bottom: 52px">
           <div class="kicker">Emergency mercy break</div>
-          <p class="side-text" style="margin: 0 0 18px">
-            Add a tiny break if you need it. Then get back in the fight.
-          </p>
-          <div
-            class="time-grid"
-            style="grid-template-columns: 1fr; max-width: 320px"
-          >
+          <p class="side-text" style="margin: 0 0 18px">Add a tiny break if you need it. Then get back in the fight.</p>
+          <div class="time-grid" style="grid-template-columns: 1fr; max-width: 320px">
             <div class="time-box">
               <div class="time-input-wrap">
-                <button
-                  class="stepper-btn"
-                  type="button"
-                  onclick="stepNumber('mercy-break-minutes', -1)"
-                >
-                  −
-                </button>
-                <input
-                  id="mercy-break-minutes"
-                  class="field"
-                  type="number"
-                  value="3"
-                  min="1"
-                  max="30"
-                />
-                <button
-                  class="stepper-btn"
-                  type="button"
-                  onclick="stepNumber('mercy-break-minutes', 1)"
-                >
-                  +
-                </button>
+                <button class="stepper-btn" type="button" onclick="stepNumber('mercy-break-minutes', -1)">−</button>
+                <input id="mercy-break-minutes" class="field" type="number" value="3" min="1" max="30" />
+                <button class="stepper-btn" type="button" onclick="stepNumber('mercy-break-minutes', 1)">+</button>
               </div>
               <div class="unit">minute(s)</div>
             </div>
           </div>
         </div>
         <div class="modal-actions compact-actions">
-          <button class="btn btn-primary arrow" onclick="grantMercyBreak()">
-            Fine. Tiny break.
-          </button>
-          <button class="btn btn-quiet-dark" onclick="closeEmptyBreakModal()">
-            No. Work harder.
-          </button>
+          <button class="btn btn-primary arrow" onclick="grantMercyBreak()">Fine. Tiny break.</button>
+          <button class="btn btn-quiet-dark" onclick="closeEmptyBreakModal()">No. Work harder.</button>
         </div>
       </div>
     </div>
     <div id="extend-modal" class="modal-backdrop">
       <div class="modal">
-        <div
-          class="slab white tilt-b"
-          style="padding-top: 42px; padding-bottom: 52px"
-        >
-          <p class="quote" style="color: #55555d">
-            Made a slight miscalculation or had to go save a puppy?
-          </p>
+        <div class="slab white tilt-b" style="padding-top: 42px; padding-bottom: 52px">
+          <p class="quote" style="color: #55555d">Made a slight miscalculation or had to go save a puppy?</p>
         </div>
-        <div
-          class="slab dark tilt-c"
-          style="padding-top: 46px; padding-bottom: 52px"
-        >
+        <div class="slab dark tilt-c" style="padding-top: 46px; padding-bottom: 52px">
           <div class="kicker">Add emergency time</div>
-          <div
-            class="time-grid"
-            style="grid-template-columns: 1fr; max-width: 320px"
-          >
+          <div class="time-grid" style="grid-template-columns: 1fr; max-width: 320px">
             <div class="time-box">
               <div class="time-input-wrap">
-                <button
-                  class="stepper-btn"
-                  type="button"
-                  onclick="stepNumber('extend-minutes', -5)"
-                >
-                  −
-                </button>
-                <input
-                  id="extend-minutes"
-                  class="field"
-                  type="number"
-                  value="10"
-                  min="1"
-                />
-                <button
-                  class="stepper-btn"
-                  type="button"
-                  onclick="stepNumber('extend-minutes', 5)"
-                >
-                  +
-                </button>
+                <button class="stepper-btn" type="button" onclick="stepNumber('extend-minutes', -5)">−</button>
+                <input id="extend-minutes" class="field" type="number" value="10" min="1" />
+                <button class="stepper-btn" type="button" onclick="stepNumber('extend-minutes', 5)">+</button>
               </div>
               <div class="unit">minute(s)</div>
             </div>
           </div>
         </div>
         <div class="modal-actions compact-actions">
-          <button class="btn btn-primary arrow" onclick="extendMission()">
-            That's all I need
-          </button>
-          <button class="btn btn-quiet-dark" onclick="failMission()">
-            No. I failed.
-          </button>
+          <button class="btn btn-primary arrow" onclick="extendMission()">That's all I need</button>
+          <button class="btn btn-quiet-dark" onclick="failMission()">No. I failed.</button>
         </div>
       </div>
     </div>
@@ -1757,14 +1406,8 @@
         osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
 
         volume.gain.setValueAtTime(0.0001, ctx.currentTime + start);
-        volume.gain.exponentialRampToValueAtTime(
-          gain,
-          ctx.currentTime + start + 0.015,
-        );
-        volume.gain.exponentialRampToValueAtTime(
-          0.0001,
-          ctx.currentTime + start + duration,
-        );
+        volume.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + start + 0.015);
+        volume.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
 
         osc.connect(volume).connect(ctx.destination);
         osc.start(ctx.currentTime + start);
@@ -1828,21 +1471,13 @@
       }
 
       function requestNotificationPermission() {
-        if (
-          "Notification" in window &&
-          Notification.permission !== "granted" &&
-          Notification.permission !== "denied"
-        ) {
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
           Notification.requestPermission();
         }
       }
 
       function sendNotification(title, body) {
-        if (
-          !("Notification" in window) ||
-          Notification.permission !== "granted"
-        )
-          return;
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
 
         new Notification(title, {
           body,
@@ -1864,14 +1499,12 @@
       }
 
       function goToStakes() {
-        state.missionTitle =
-          $("mission-title").value.trim() || "Unnamed mission";
+        state.missionTitle = $("mission-title").value.trim() || "Unnamed mission";
         showPage("stakes-page");
       }
 
       function goToTasks() {
-        state.consequence =
-          $("consequence").value.trim() || "accept the consequence";
+        state.consequence = $("consequence").value.trim() || "accept the consequence";
         state.reward = $("reward").value.trim() || "enjoy the victory";
 
         if ($("task-list").children.length === 0) {
@@ -1882,9 +1515,7 @@
       }
 
       function jumpToStart() {
-        const ok = confirm(
-          "Are you sure you want to jump back to the start? This will clear the current mission.",
-        );
+        const ok = confirm("Are you sure you want to jump back to the start? This will clear the current mission.");
         if (!ok) return;
 
         clearAllData();
@@ -1895,11 +1526,7 @@
       // Task Editor and Drag-and-Drop
       // =========================================================
 
-      function addTask(
-        value = "",
-        placeholder = "Write one clear target",
-        afterRow = null,
-      ) {
+      function addTask(value = "", placeholder = "Write one clear target", afterRow = null) {
         const list = $("task-list");
         const row = document.createElement("div");
 
@@ -1991,10 +1618,7 @@
       function formatMinuteInput(input) {
         const min = input.min === "" ? 0 : parseInt(input.min, 10);
         const max = input.max === "" ? 59 : parseInt(input.max, 10);
-        const value = Math.max(
-          min,
-          Math.min(max, parseInt(input.value || "0", 10)),
-        );
+        const value = Math.max(min, Math.min(max, parseInt(input.value || "0", 10)));
 
         input.value = String(value).padStart(2, "0");
       }
@@ -2006,14 +1630,8 @@
       function startMission() {
         requestNotificationPermission();
 
-        const hours = Math.max(
-          0,
-          parseInt($("mission-hours").value || "0", 10),
-        );
-        const minutes = Math.max(
-          0,
-          parseInt($("mission-minutes").value || "0", 10),
-        );
+        const hours = Math.max(0, parseInt($("mission-hours").value || "0", 10));
+        const minutes = Math.max(0, parseInt($("mission-minutes").value || "0", 10));
 
         state.remainingSeconds = Math.max(60, hours * 3600 + minutes * 60);
         state.tasks = collectTasksFromEditor();
@@ -2062,10 +1680,7 @@
         const task = state.tasks[state.activeTaskIndex];
         const now = Date.now();
 
-        const duration = Math.max(
-          1,
-          Math.round((now - state.taskStartedAt) / 1000)
-        );
+        const duration = Math.max(1, Math.round((now - state.taskStartedAt) / 1000));
 
         const earned = Math.round(duration / state.breakEarnRatio);
 
@@ -2082,7 +1697,7 @@
 
         playSound("done");
 
-        const nextIndex = state.tasks.findIndex(task => task.status !== "done");
+        const nextIndex = state.tasks.findIndex((task) => task.status !== "done");
 
         if (nextIndex === -1) {
           succeedMission();
@@ -2110,7 +1725,7 @@
         state.tasks.splice(state.activeTaskIndex, 1);
         state.tasks.push(currentTask);
 
-        const nextIndex = state.tasks.findIndex(task => task.status !== "done");
+        const nextIndex = state.tasks.findIndex((task) => task.status !== "done");
 
         if (nextIndex === -1) {
           succeedMission();
@@ -2156,10 +1771,7 @@
       }
 
       function extendMission() {
-        const add = Math.max(
-          1,
-          parseInt($("extend-minutes").value || "10", 10),
-        );
+        const add = Math.max(1, parseInt($("extend-minutes").value || "10", 10));
 
         state.remainingSeconds += add * 60;
         $("extend-modal").classList.remove("show");
@@ -2240,10 +1852,7 @@
       }
 
       function grantMercyBreak() {
-        const minutes = Math.max(
-          1,
-          parseInt($("mercy-break-minutes").value || "3", 10),
-        );
+        const minutes = Math.max(1, parseInt($("mercy-break-minutes").value || "3", 10));
 
         state.breakBankSeconds += minutes * 60;
         $("empty-break-modal").classList.remove("show");
@@ -2297,10 +1906,7 @@
         state.focusedWorkSinceBonus = 0;
 
         playSound("break");
-        sendNotification(
-          "Bonus Time Earned!",
-          "You've worked 30 mins. +5 minutes added to your break bank.",
-        );
+        sendNotification("Bonus Time Earned!", "You've worked 30 mins. +5 minutes added to your break bank.");
       }
 
       function pauseForEmergencyTime() {
@@ -2310,10 +1916,7 @@
         updateDisplay();
         $("extend-modal").classList.add("show");
         playSound("warning");
-        sendNotification(
-          "Timer Paused",
-          "Time is up! Add emergency time or accept your consequence.",
-        );
+        sendNotification("Timer Paused", "Time is up! Add emergency time or accept your consequence.");
       }
 
       // =========================================================
@@ -2322,19 +1925,15 @@
 
       async function openMiniTimer() {
         if (!("documentPictureInPicture" in window)) {
-          alert(
-            "Your browser doesn't support the Mini Player API yet. Try Chrome or Edge!",
-          );
+          alert("Your browser doesn't support the Mini Player API yet. Try Chrome or Edge!");
           return;
         }
 
         try {
-          const pipWindow = await window.documentPictureInPicture.requestWindow(
-            {
-              width: 320,
-              height: 160,
-            },
-          );
+          const pipWindow = await window.documentPictureInPicture.requestWindow({
+            width: 320,
+            height: 160,
+          });
 
           pipWindow.document.head.innerHTML = getMiniPlayerStyles();
           pipWindow.document.body.innerHTML = `
@@ -2402,43 +2001,39 @@
       // Display Updates
       // =========================================================
 
-        function updateDisplay() {
-          const task = state.tasks[state.activeTaskIndex];
-          const currentTaskText = task ? task.title : "Mission complete";
-          const timeStr = formatTime(state.remainingSeconds);
+      function updateDisplay() {
+        const task = state.tasks[state.activeTaskIndex];
+        const currentTaskText = task ? task.title : "Mission complete";
+        const timeStr = formatTime(state.remainingSeconds);
 
-          const mainTimerEl = $("main-timer");
+        const mainTimerEl = $("main-timer");
 
-          mainTimerEl.textContent = timeStr;
-          mainTimerEl.classList.remove("timer-warning", "timer-danger");
+        mainTimerEl.textContent = timeStr;
+        mainTimerEl.classList.remove("timer-warning", "timer-danger");
 
-          if (state.mode === "work") {
-            if (state.remainingSeconds <= 60) {
-              mainTimerEl.classList.add("timer-danger");
-            } else if (state.remainingSeconds <= 5 * 60) {
-              mainTimerEl.classList.add("timer-warning");
-            }
+        if (state.mode === "work") {
+          if (state.remainingSeconds <= 60) {
+            mainTimerEl.classList.add("timer-danger");
+          } else if (state.remainingSeconds <= 5 * 60) {
+            mainTimerEl.classList.add("timer-warning");
           }
-
-          $("break-bank").textContent = formatTime(state.breakBankSeconds);
-          $("break-timer").textContent = formatTime(state.breakRemainingSeconds);
-
-          updateCurrentTaskTitle(currentTaskText);
-          updateMiniTaskList();
-          updateBrowserTitle(timeStr, currentTaskText);
-          updateMiniPlayer(timeStr, currentTaskText);
         }
+
+        $("break-bank").textContent = formatTime(state.breakBankSeconds);
+        $("break-timer").textContent = formatTime(state.breakRemainingSeconds);
+
+        updateCurrentTaskTitle(currentTaskText);
+        updateMiniTaskList();
+        updateBrowserTitle(timeStr, currentTaskText);
+        updateMiniPlayer(timeStr, currentTaskText);
+      }
 
       function updateCurrentTaskTitle(currentTaskText) {
         const currentTaskEl = $("current-task");
 
         currentTaskEl.textContent = currentTaskText;
         currentTaskEl.title = currentTaskText;
-        currentTaskEl.classList.remove(
-          "long-task",
-          "very-long-task",
-          "insane-long-task",
-        );
+        currentTaskEl.classList.remove("long-task", "very-long-task", "insane-long-task");
 
         if (currentTaskText.length > 90) {
           currentTaskEl.classList.add("insane-long-task");
@@ -2470,10 +2065,7 @@
       }
 
       function updateBrowserTitle(timeStr, currentTaskText) {
-        document.title =
-          state.mode === "work"
-            ? `[${timeStr}] ${currentTaskText}`
-            : "Get Shit Done";
+        document.title = state.mode === "work" ? `[${timeStr}] ${currentTaskText}` : "Get Shit Done";
       }
 
       function updateMiniPlayer(timeStr, currentTaskText) {
@@ -2483,10 +2075,7 @@
 
       function updateClock() {
         const now = new Date();
-        $("clock").textContent =
-          `${String(now.getHours()).padStart(2, "0")}:${String(
-            now.getMinutes(),
-          ).padStart(2, "0")}`;
+        $("clock").textContent = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       }
 
       // =========================================================
@@ -2501,21 +2090,14 @@
         const s = seconds % 60;
 
         if (h > 0) {
-          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
-            s,
-          ).padStart(2, "0")}`;
+          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
         }
 
         return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
       }
 
       function escapeHtml(text) {
-        return String(text)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
+        return String(text).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
       }
 
       // =========================================================
