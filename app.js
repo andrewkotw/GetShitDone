@@ -867,61 +867,7 @@
 
       function getMiniPlayerStyles() {
         return `
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        background: linear-gradient(145deg, #161621 0%, #050509 100%);
-        color: white;
-        font-family: Inter, Arial, Helvetica, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-      }
-
-      #pip-timer {
-        font-size: clamp(3.5rem, 15vw, 5rem);
-        font-weight: 300;
-        line-height: 1;
-        letter-spacing: -0.04em;
-        font-variant-numeric: tabular-nums;
-        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      }
-
-#pip-task {
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
-  margin-top: 10px;
-  text-align: center;
-  padding: 6px 20px;
-  border-radius: 14px;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-
-  cursor: pointer;
-  transition:
-    color 0.14s ease,
-    background 0.14s ease,
-    transform 0.14s ease;
-}
-
-#pip-task:hover {
-  color: #fff0c9;
-  background: rgba(217, 176, 106, 0.12);
-  transform: translateY(-1px);
-}
-
-#pip-task:active {
-  transform: translateY(1px) scale(0.98);
-}
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   `;
       }
 
@@ -1257,3 +1203,5 @@
 
       updateClock();
       setInterval(updateClock, 1000);
+    
+    <script src="app.js" defer>

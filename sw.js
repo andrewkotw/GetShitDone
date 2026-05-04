@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.05.04-3";
+const APP_VERSION = "2026.05.04-5";
 const CACHE_PREFIX = "get-shit-done";
 const CACHE_NAME = `${CACHE_PREFIX}-${APP_VERSION}`;
 
