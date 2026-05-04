@@ -1,10 +1,12 @@
-const APP_VERSION = "2026.05.04-1";
+const APP_VERSION = "2026.05.04-2";
 const CACHE_PREFIX = "get-shit-done";
 const CACHE_NAME = `${CACHE_PREFIX}-${APP_VERSION}`;
 
 const APP_SHELL_FILES = [
   "./",
   "./index.html",
+  "./styles.css",
+  "./app.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-192-maskable.png",
