@@ -1,9 +1,6 @@
 name: Split inline HTML assets
 
 on:
-  push:
-    branches:
-      - refactor-split-html-css-js
   workflow_dispatch:
 
 permissions:
